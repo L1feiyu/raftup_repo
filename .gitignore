@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# build artifacts
+docs/build/
+
+# demo outputs
+outputs/
+
+# python cache
+__pycache__/
+*.pyc
