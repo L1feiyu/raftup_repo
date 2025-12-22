@@ -7,10 +7,10 @@ a real experimental notebook.
 
 ---
 
-## Demo notebook
+## Minimal demo
 
-- Notebook: `examples/demo_minimal.ipynb`
-- Script (synced via jupytext): `python scripts/run_demo.py`
+- Notebook: [examples/demo_minimal.ipynb](https://github.com/L1feiyu/raftup_repo/blob/main/examples/demo_minimal.ipynb)
+- Script: `python scripts/run_demo.py`
 
 This demo generates a toy dataset and writes outputs to `./outputs/`.
 
