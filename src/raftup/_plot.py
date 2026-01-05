@@ -61,6 +61,17 @@ def visualize_ot_mapping_3d(
     seed : int
         Random seed for edge subsampling.
     """
+    try:
+        from mayavi import mlab
+    except ImportError as e:
+        raise ImportError(
+            "\n[RAFT-UP] Optional dependency missing: 'mayavi'\n\n"
+            "The function `visualize_ot_mapping_3d` requires Mayavi for 3D "
+            "visualization.\n\n"
+            "Please install it via:\n"
+            "  conda install -c conda-forge mayavi\n"
+        ) from e
+    
     X1 = np.asarray(X1)
     X2 = np.asarray(X2)
     P  = np.asarray(P)
