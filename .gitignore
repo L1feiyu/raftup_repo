@@ -10,3 +10,18 @@ outputs/
 # python cache
 __pycache__/
 *.pyc
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data / results
+data/
+outputs/
+
+# Docs build artifacts
+docs/_build/
+docs/source/_static/
+
+# R
+.Rhistory
