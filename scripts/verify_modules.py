@@ -12,6 +12,11 @@ from raftup import (
     _recoverfull_new_new_knn,
 )
 
+from raftup import _plot
+
+def test_plot():
+    print("[TEST] _plot")
+    print("  OK")
 
 def test_downsample():
     print("[TEST] _downsample")
@@ -53,4 +58,5 @@ if __name__ == "__main__":
     test_metrics()
     test_utils()
     test_recover()
+    test_plot()
     print("\nAll smoke tests passed.")

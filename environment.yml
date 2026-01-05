@@ -3,8 +3,12 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.12
   - jupyterlab
-  - openpyxl
   - mayavi
   - numpy=2.0
+  - openpyxl
+  - python=3.12
+  - pandas
+  - scanpy
+  - squidpy
+  - plotly
