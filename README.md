@@ -6,4 +6,9 @@
 
 RAFT-UP is under active development.
 
-try python scripts/verify_modules.py ti verify core modules after installation.
+try 
+
+#bash
+python scripts/verify_modules.py 
+
+to verify core modules after installation.
