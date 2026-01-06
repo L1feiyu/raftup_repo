@@ -1,18 +1,31 @@
 # Results
 
-This page summarizes experimental results for RAFT-UP.
+This page presents representative results reproduced using the
+packaged **RAFT-UP** implementation.
 
-## Highlights
+All figures were regenerated after refactoring the codebase into
+a Python package and serve as regression validation.
 
-- (TODO) Add a short bullet list of key results.
-- (TODO) Add links to demo notebooks and scripts.
+---
 
-## Figures
+## Overlapping-window alignment (regular window, GW=50, CC=0.1)
 
-### Example alignment
+![Small window alignment](./_static/results/raftup_small_window_adjacent_subslices_thick_1215_copycopy.png)
 
-![Example alignment](./_static/results/example_alignment.png)
+**Setting**
+- Dataset: DLPFC
+- Window: overlapping regular window
+- feature threshold: 10%
+- spatial threshold: 50 micrometers
 
-## Tables
+---
 
-(Coming soon)
+## Overlapping-window alignment (irregular window, GW=50, CC=0.1)
+
+![Small window alignment](./_static/results/raftup_small_window_adjacent_subslices_thick_copycopy.png)
+
+**Setting**
+- Dataset: DLPFC
+- Window: overlapping irregular window
+- feature threshold: 10%
+- spatial threshold: 50 micrometers
