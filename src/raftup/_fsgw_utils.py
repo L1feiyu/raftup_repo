@@ -417,3 +417,88 @@ def fsgw_mvc(
         P, f, g = perform_sOT_log((1 - fsgw_alpha) * M + fsgw_alpha * D, a, b, fsgw_eps, options)
 
     return P
+    
+def fsgw_mvc_reproducible(
+    D1,
+    D2,
+    M,
+    gw_cutoff=np.inf,
+    w_cutoff=np.inf,
+    fsgw_niter=10,
+    fsgw_eps=0.01,
+    fsgw_alpha=0.1,
+    fsgw_gamma=2,
+    seed=0,
+    verbose=True,
+):
+    """
+    Reproducible wrapper for fsgw_mvc.
+
+    This function does NOT modify the original algorithm.
+    It only controls randomness and verbosity for reproducibility.
+
+    Parameters
+    ----------
+    D1, D2 : np.ndarray
+        Intra-slice distance matrices.
+    M : np.ndarray
+        Feature cost matrix.
+    gw_cutoff, w_cutoff : float
+        GW / feature cutoffs.
+    fsgw_niter, fsgw_eps, fsgw_alpha, fsgw_gamma : float
+        Same as in fsgw_mvc.
+    seed : int
+        Random seed for reproducibility.
+    verbose : bool
+        Whether to show tqdm progress bar.
+
+    Returns
+    -------
+    P : np.ndarray
+        Transport plan.
+    """
+
+    # ---- control randomness ----
+    np.random.seed(seed)
+
+    # ---- optionally silence tqdm ----
+    if not verbose:
+        from contextlib import contextmanager
+
+        @contextmanager
+        def _silent_tqdm():
+            import tqdm as _tqdm
+            old_tqdm = _tqdm.tqdm
+            _tqdm.tqdm = lambda *a, **k: old_tqdm(*a, disable=True, **k)
+            try:
+                yield
+            finally:
+                _tqdm.tqdm = old_tqdm
+
+        with _silent_tqdm():
+            P = fsgw_mvc(
+                D1,
+                D2,
+                M,
+                gw_cutoff=gw_cutoff,
+                w_cutoff=w_cutoff,
+                fsgw_niter=fsgw_niter,
+                fsgw_eps=fsgw_eps,
+                fsgw_alpha=fsgw_alpha,
+                fsgw_gamma=fsgw_gamma,
+            )
+    else:
+        P = fsgw_mvc(
+            D1,
+            D2,
+            M,
+            gw_cutoff=gw_cutoff,
+            w_cutoff=w_cutoff,
+            fsgw_niter=fsgw_niter,
+            fsgw_eps=fsgw_eps,
+            fsgw_alpha=fsgw_alpha,
+            fsgw_gamma=fsgw_gamma,
+        )
+
+    return P    
+    

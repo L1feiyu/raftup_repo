@@ -6,6 +6,21 @@ import anndata
 import matplotlib.pyplot as plt
 import scipy.sparse
 
+# for loading DLPFC12 data
+def load_DLPFC(root_dir='/Users/salovjade/Library/CloudStorage/Dropbox/RAFTUP_after0320/DLPFC12', section_id='151507'):
+    # 151507, ..., 151676 12 in total
+    ad = sc.read_visium(path=os.path.join(root_dir, section_id), count_file=section_id+'_filtered_feature_bc_matrix.h5')
+    ad.var_names_make_unique()
+
+    gt_dir = os.path.join(root_dir, section_id, 'gt')
+    gt_df = pd.read_csv(os.path.join(gt_dir, 'tissue_positions_list_GTs.txt'), sep=',', header=None, index_col=0)
+    ad.obs['original_clusters'] = gt_df.loc[:, 6]
+    keep_bcs = ad.obs.dropna().index
+    ad = ad[keep_bcs].copy()
+    ad.obs['original_clusters'] = ad.obs['original_clusters'].astype(int).astype(str)
+    # print(ad.obs)
+    return ad
+
 
 # for loading mHypothalamus data
 def load_mHypothalamus(root_dir='/Users/salovjade/Library/CloudStorage/Dropbox/RAFTUP_after0320/mHypothalamus', section_id='0.26'):
