@@ -11,8 +11,8 @@ Welcome to RAFT-UP's documentation!
    :caption: Contents:
    
    installation
-   quickstart
-   results
+   tutorials
+   experiments
 
 
 Indices and tables

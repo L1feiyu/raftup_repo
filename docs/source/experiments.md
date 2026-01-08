@@ -1,12 +1,57 @@
-# Results
+# Experiments
 
-This page presents representative results reproduced using the packaged
-**RAFT-UP** implementation.
+This page documents representative experiments reproduced using the
+packaged **RAFT-UP** implementation.
 
-All figures shown below were regenerated after refactoring the codebase
-into a standalone Python package. They serve as **regression validation**
-to confirm that the packaged implementation reproduces previously
-verified experimental results.
+All experiments were rerun after refactoring the codebase into a
+reproducible Python package (`raftup`).
+
+Each experiment corresponds to a concrete notebook that can
+be executed end-to-end.
+
+---
+
+## Full slice alignment (Adjacent DLPFC slices) 
+
+![Adjacent slices](_static/results/raftup_small_window_1.png)
+
+**Setting**
+- Dataset: DLPFC
+- Distance between slices: 
+- Feature threshold: 10%
+- Spatial threshold: 50 μm
+
+## Full slice alignment (Far-apart DLPFC slices)
+
+![far-apart slices](_static/results/raftup_small_window_1.png)
+
+**Setting**
+- Dataset: DLPFC
+- Distance between slices: 
+- Feature threshold: 10%
+- Spatial threshold: 50 μm
+
+---
+
+## Full slice alignment (Adjacent MERFISH slices)
+
+![Adjacent slices](_static/results/raftup_small_window_1.png)
+
+**Setting**
+- Dataset: MERFISH
+- Distance between slices: 
+- Feature threshold: 10%
+- Spatial threshold: 50 μm
+
+## Full slice alignment (Far-apart MERFISH slices)
+
+![Far-apart slices](_static/results/raftup_small_window_1.png)
+
+**Setting**
+- Dataset: MERFISH
+- Distance between slices: 
+- Feature threshold: 10%
+- Spatial threshold: 50 μm
 
 ---
 
@@ -19,8 +64,6 @@ verified experimental results.
 - Window type: overlapping regular window
 - Feature threshold: 10%
 - Spatial threshold: 50 μm
-- GW cutoff: 50
-- CC cutoff: 0.1
 
 This experiment demonstrates stable alignment between two adjacent
 DLPFC subslices under a regular overlapping window configuration.
@@ -37,8 +80,6 @@ Only the top-1 optimal transport edge per source cell is visualized.
 - Window type: overlapping irregular window
 - Feature threshold: 10%
 - Spatial threshold: 50 μm
-- GW cutoff: 50
-- CC cutoff: 0.1
 
 Compared to the regular window setting, this experiment evaluates the
 robustness of RAFT-UP under irregular overlapping regions. The alignment
