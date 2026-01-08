@@ -273,106 +273,102 @@ def visualize_subslice(
     return color_map
 
 
-
-#############     we dont use this at this version     #############
 import numpy as np
-from scipy.spatial.distance import pdist, squareform
+import matplotlib.pyplot as plt
 
-def downsample_slice_new(sliceA, tar_distance):
-    """
-    Downsample the given slice based on spatial coordinates to ensure a minimum distance.
-    
-    Parameters:
-    - sliceA: AnnData object, contains spatial coordinates in `sliceA.obsm['spatial']`.
-    - tar_distance: float, target minimum distance between spots.
-    
-    Returns:
-    - downsampled_sliceA: AnnData object, downsampled version of `sliceA`.
-    - indices_dsa: list of int, indices of the downsampled spots in the original slice.
-    """
-    def get_pairwise_distances(coords):
-        return squareform(pdist(coords))
-    
-    def select_points_with_min_distance(coords, min_distance):
-        n_points = len(coords)
-        distances = get_pairwise_distances(coords)
-        
-        # Start with the point that has the most neighbors beyond min_distance
-        selected_indices = []
-        available_indices = set(range(n_points))
-        
-        while available_indices:
-            if not selected_indices:
-                # For first point, choose one near the center
-                center = np.mean(coords, axis=0)
-                distances_to_center = np.linalg.norm(coords - center, axis=1)
-                first_point = np.argmin(distances_to_center)
-                selected_indices.append(first_point)
-                available_indices.remove(first_point)
-            else:
-                # For each available point, check if it maintains min_distance with all selected points
-                valid_points = []
-                for idx in available_indices:
-                    valid = True
-                    for selected_idx in selected_indices:
-                        if distances[idx, selected_idx] < min_distance:
-                            valid = False
-                            break
-                    if valid:
-                        valid_points.append(idx)
-                
-                if not valid_points:
-                    break
-                
-                # Among valid points, select the one closest to any existing point
-                # but still maintaining min_distance
-                min_max_distance = float('inf')
-                best_point = None
-                for idx in valid_points:
-                    max_dist = max(distances[idx, selected_idx] for selected_idx in selected_indices)
-                    if max_dist < min_max_distance:
-                        min_max_distance = max_dist
-                        best_point = idx
-                
-                if best_point is not None:
-                    selected_indices.append(best_point)
-                    available_indices.remove(best_point)
-                else:
-                    break
-        
-        return sorted(selected_indices)
 
-    # Get spatial coordinates
-    spatial_coords = sliceA.obsm['spatial'].copy()
-    
-    # Select points maintaining minimum distance
-    indices_dsa = select_points_with_min_distance(spatial_coords, tar_distance)
-    
-    # Create downsampled AnnData object
-    if indices_dsa:
+def maxmin_downsample_slice_merfish(sliceA, num_landmarks: int):
+    """
+    Downsample a MERFISH slice using max-min (farthest point) sampling
+    on spatial coordinates.
+
+    This function is intended for MERFISH-style dense point clouds and
+    is mainly used for experimental comparisons / ablations.
+
+    Parameters
+    ----------
+    sliceA : AnnData
+        Input slice with spatial coordinates in `sliceA.obsm['spatial']`.
+    num_landmarks : int
+        Number of landmarks to select.
+
+    Returns
+    -------
+    downsampled_sliceA : AnnData or None
+        Downsampled slice.
+    indices_dsa : list[int]
+        Indices of selected spots in the original slice.
+    """
+    if "spatial" not in sliceA.obsm_keys():
+        raise KeyError("sliceA.obsm['spatial'] does not exist.")
+
+    points = np.asarray(sliceA.obsm["spatial"])
+    n = points.shape[0]
+
+    if num_landmarks > n:
+        raise ValueError(
+            f"num_landmarks ({num_landmarks}) exceeds number of points ({n})."
+        )
+
+    # ---- max-min (farthest point) sampling ----
+    landmarks = [np.random.randint(n)]
+    distances = np.full(n, np.inf)
+
+    for _ in range(num_landmarks - 1):
+        last = points[landmarks[-1]]
+        new_dist = np.linalg.norm(points - last, axis=1)
+        distances = np.minimum(distances, new_dist)
+        next_landmark = np.argmax(distances)
+        landmarks.append(next_landmark)
+
+    indices_dsa = list(map(int, landmarks))
+
+    if len(indices_dsa) > 0:
         downsampled_sliceA = sliceA[indices_dsa].copy()
     else:
         downsampled_sliceA = None
-        
+
     return downsampled_sliceA, indices_dsa
 
-def verify_distances_new(adata, min_distance):
+
+def visualize_merfish_downsampled_points(sliceA, downsampled_sliceA):
     """
-    Verify that all pairwise distances in the AnnData object are >= min_distance
-    
-    Parameters:
-    - adata: AnnData object with spatial coordinates
-    - min_distance: minimum expected distance
-    
-    Returns:
-    - bool: whether all distances meet the criterion
-    - float: actual minimum non-zero distance
+    Visualize original vs downsampled spatial points for MERFISH data.
+
+    Parameters
+    ----------
+    sliceA : AnnData
+        Original slice with `obsm['spatial']`.
+    downsampled_sliceA : AnnData
+        Downsampled slice obtained from maxmin_downsample_slice_merfish.
+
+    Returns
+    -------
+    None
     """
-    coords = adata.obsm['spatial']
-    distances = squareform(pdist(coords))
-    # Get minimum non-zero distance
-    min_nonzero = np.min(distances[distances > 0])
-    # Check if all non-zero distances are >= min_distance
-    meets_criterion = np.all(distances[distances > 0] >= min_distance)
-    return meets_criterion, min_nonzero
+    if downsampled_sliceA is None:
+        raise ValueError("downsampled_sliceA is None; nothing to visualize.")
+
+    A = np.asarray(sliceA.obsm["spatial"])
+    A_ds = np.asarray(downsampled_sliceA.obsm["spatial"])
+
+    plt.figure(figsize=(8, 6))
+    plt.scatter(
+        A[:, 0], A[:, 1],
+        s=4, c="lightgray",
+        label=f"Original ({len(A)})"
+    )
+    plt.scatter(
+        A_ds[:, 0], A_ds[:, 1],
+        s=20, c="red",
+        label=f"Downsampled ({len(A_ds)})"
+    )
+
+    plt.gca().set_aspect("equal")
+    plt.gca().invert_yaxis()
+    plt.title("MERFISH max-min downsampling")
+    plt.legend()
+    plt.axis("off")
+    plt.tight_layout()
+    plt.show()
 
