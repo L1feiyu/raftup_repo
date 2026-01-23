@@ -203,7 +203,7 @@ from scipy import sparse
 from tqdm import tqdm
 
 
-def fsgw_mvc(
+def fsgw_mvc_warm_start(
     D1: np.ndarray,
     D2: np.ndarray,
     M: np.ndarray,
@@ -418,7 +418,7 @@ def fsgw_mvc(
 
     return P
     
-def fsgw_mvc_reproducible(
+def fsgw_mvc_exp(
     D1,
     D2,
     M,
@@ -428,77 +428,94 @@ def fsgw_mvc_reproducible(
     fsgw_eps=0.01,
     fsgw_alpha=0.1,
     fsgw_gamma=2,
-    seed=0,
-    verbose=True,
+    seed=42,                     # ✅ 默认 seed 改为 42
 ):
-    """
-    Reproducible wrapper for fsgw_mvc.
+    # -----------------------------
+    # reproducibility (only this)
+    # -----------------------------
+    if seed is not None:
+        np.random.seed(seed)
 
-    This function does NOT modify the original algorithm.
-    It only controls randomness and verbosity for reproducibility.
+    n = D1.shape[0]
+    m = D2.shape[0]
 
-    Parameters
-    ----------
-    D1, D2 : np.ndarray
-        Intra-slice distance matrices.
-    M : np.ndarray
-        Feature cost matrix.
-    gw_cutoff, w_cutoff : float
-        GW / feature cutoffs.
-    fsgw_niter, fsgw_eps, fsgw_alpha, fsgw_gamma : float
-        Same as in fsgw_mvc.
-    seed : int
-        Random seed for reproducibility.
-    verbose : bool
-        Whether to show tqdm progress bar.
+    # ---- normalize M (you asked for this) ----
+    M = M / M.max()
 
-    Returns
-    -------
-    P : np.ndarray
-        Transport plan.
-    """
+    t = D1[D1 > 0].max()
+    D1_norm = D1 / t
+    D2_norm = D2 / t
 
-    # ---- control randomness ----
-    np.random.seed(seed)
+    P_idx = np.array([[i, j] for i, j in itertools.product(range(n), range(m))], dtype=int)
 
-    # ---- optionally silence tqdm ----
-    if not verbose:
-        from contextlib import contextmanager
+    I, J = [], []
+    for u in range(len(P_idx)):
+        i, j = P_idx[u]
+        D_tmp = (D1[i, :, None] - D2[j, :]) ** 2
+        tmp_idx = np.where(D_tmp.flatten() <= gw_cutoff**2)[0]
+        J.extend(tmp_idx.tolist())
+        I.extend([u] * len(tmp_idx))
 
-        @contextmanager
-        def _silent_tqdm():
-            import tqdm as _tqdm
-            old_tqdm = _tqdm.tqdm
-            _tqdm.tqdm = lambda *a, **k: old_tqdm(*a, disable=True, **k)
-            try:
-                yield
-            finally:
-                _tqdm.tqdm = old_tqdm
+    A = sparse.coo_matrix(
+        (np.ones(len(I)), (np.array(I), np.array(J))),
+        shape=(n * m, n * m),
+    )
 
-        with _silent_tqdm():
-            P = fsgw_mvc(
-                D1,
-                D2,
-                M,
-                gw_cutoff=gw_cutoff,
-                w_cutoff=w_cutoff,
-                fsgw_niter=fsgw_niter,
-                fsgw_eps=fsgw_eps,
-                fsgw_alpha=fsgw_alpha,
-                fsgw_gamma=fsgw_gamma,
-            )
-    else:
-        P = fsgw_mvc(
-            D1,
-            D2,
-            M,
-            gw_cutoff=gw_cutoff,
-            w_cutoff=w_cutoff,
-            fsgw_niter=fsgw_niter,
-            fsgw_eps=fsgw_eps,
-            fsgw_alpha=fsgw_alpha,
-            fsgw_gamma=fsgw_gamma,
+    G = nx.from_scipy_sparse_array(A)
+    tmp_idx = np.where(M.flatten() > w_cutoff)[0]
+    G.remove_nodes_from(tmp_idx)
+
+    M_flatten = M.flatten()
+    zero_indices = set()
+    G_copy = nx.complement(G)
+    del G
+
+    with tqdm(total=G_copy.number_of_edges(),
+              desc=f"Finding MVC for gw={gw_cutoff}, w={w_cutoff}") as pbar:
+        while G_copy.edges:
+            initial_edges = G_copy.number_of_edges()
+            vertices, _ = vertex_with_most_edges(G_copy)
+            v_best = max(vertices, key=lambda v: M_flatten[v])
+            G_copy.remove_node(v_best)
+            zero_indices.add(v_best)
+            pbar.update(initial_edges - G_copy.number_of_edges())
+
+    zero_indices = np.array(list(zero_indices) + list(tmp_idx), dtype=int)
+
+    row_idx = P_idx[zero_indices, 0]
+    col_idx = P_idx[zero_indices, 1]
+
+    a = np.ones(n) / n
+    b = np.ones(m) / m
+    aa = a + 1e-1 * np.random.rand(n) / n
+    bb = b + 1e-1 * np.random.rand(m) / m
+    aa /= aa.sum()
+    bb /= bb.sum()
+
+    P = np.outer(aa, bb)
+    P[row_idx, col_idx] = 0.0
+
+    f = np.zeros(n)
+    g = np.zeros(m)
+
+    for _ in range(fsgw_niter):
+        D = np.zeros((n, m))
+        for i, j in np.argwhere(P != 0):
+            D += P[i, j] * (D1_norm[:, i, None] - D2_norm[None, j, :]) ** 2
+
+        D = 2 * D
+        D[row_idx, col_idx] = np.inf
+
+        options = {
+            "niter_sOT": 10**4,
+            "f_init": f,
+            "g_init": g,
+            "penalty": 2,
+        }
+
+        P, f, g = perform_sOT_log(
+            (1 - fsgw_alpha) * M + fsgw_alpha * D,
+            a, b, fsgw_eps, options
         )
 
     return P    
-    
