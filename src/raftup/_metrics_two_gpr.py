@@ -5,12 +5,42 @@ import sklearn
 import sklearn.metrics.pairwise
 import pandas as pd
 
-# fig7 DLPFC
-
 
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import KDTree, distance_matrix
+
+def cal_layer_based_alignment_result_threepoint_embryo_skip_all_zero(alignment, labels):
+    group_A_combinations = {
+        ('RGC', 'RGC'), ('RGC', 'GlioB'), ('RGC', 'NeuB'),
+        ('GlioB', 'GlioB'), ('NeuB', 'NeuB')
+    }
+    
+    cnt0 = 0
+    valid_rows = 0
+
+    for i in range(alignment.shape[0]):
+        if alignment[i].sum() == 0:
+            continue
+            
+        valid_rows += 1
+        
+        source_label = labels[i]
+        target_idx = alignment[i].argmax()
+        target_label = labels[target_idx + alignment.shape[0]]
+        
+        if source_label == '-1' or target_label == '-1':
+            continue
+            
+        if (source_label, target_label) in group_A_combinations:
+            cnt0 += 1
+
+    accuracy = cnt0 / valid_rows if valid_rows > 0 else 0
+    
+    print(f"total row: {alignment.shape[0]}, aligned row: {valid_rows}")
+    print(f"correct alignment: {cnt0}, rate: {accuracy:.4f}")
+    
+    return accuracy
 
 def compute_pointwise_neighbor_preservation(P, neighbors1, neighbors2, k=200):
     n1, n2 = P.shape

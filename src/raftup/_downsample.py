@@ -1,12 +1,85 @@
-import scanpy as sc
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import squidpy as sq
 import pandas as pd
 import numpy as np
+import scanpy as sc
+from sklearn.neighbors import LocalOutlierFactor
 
-import numpy as np
+def maxmin_sampling(points, num_landmarks, random_state=23):
+    """
+    Downsample using deterministic max-min sampling.
+
+    Parameters:
+    - points: np.ndarray, spatial coordinates.
+    - num_landmarks: int, number of selected landmarks.
+    - random_state: int or None, seed for reproducibility.
+
+    Returns:
+    - downsampled_coords: np.ndarray, selected landmark coordinates.
+    - landmark_indices: list, indices of selected points.
+    """
+    num_points = points.shape[0]
+    if num_landmarks > num_points:
+        raise ValueError("num_landmarks cannot exceed the number of available points.")
+    
+    if random_state is not None:
+        np.random.seed(random_state)
+
+    landmarks = [np.random.randint(num_points)]
+    distances = np.full(num_points, np.inf)
+
+    for _ in range(num_landmarks - 1):
+        last_landmark = points[landmarks[-1]]
+        new_distances = np.linalg.norm(points - last_landmark, axis=1)
+        distances = np.minimum(distances, new_distances)
+        new_landmark = np.argmax(distances)
+        landmarks.append(new_landmark)
+
+    return points[np.array(landmarks)], landmarks
+
+
+
+def robust_maxmin_downsample_slice(sliceA, num_landmarks, outlier_fraction=0.05, n_neighbors=20):
+    """
+    Downsample the spatial coordinates of a slice using max-min sampling,
+    excluding detected outlier points.
+
+    Parameters:
+    - sliceA: AnnData object, containing spatial data.
+    - num_landmarks: int, number of landmarks to select.
+    - outlier_fraction: float, expected fraction of outliers (default 5%).
+    - n_neighbors: int, number of neighbors used in LOF (default 20).
+
+    Returns:
+    - downsampled_sliceA: AnnData object, downsampled version of sliceA.
+    - indices_dsa: list, indices of selected spots in the original data.
+    - cleaned_indices: list, indices of points after outlier removal.
+    """
+    spatial_coords_A = np.array(sliceA.obsm['spatial'])
+    
+    # Step 1: Detect and remove outliers using Local Outlier Factor (LOF)
+    lof = LocalOutlierFactor(n_neighbors=n_neighbors, contamination=outlier_fraction)
+    is_inlier = lof.fit_predict(spatial_coords_A) > 0  # Inliers are labeled as 1
+
+    cleaned_coords = spatial_coords_A[is_inlier]
+    cleaned_indices = np.where(is_inlier)[0]
+
+    if cleaned_coords.shape[0] < num_landmarks:
+        raise ValueError(f"Not enough points after removing outliers ({cleaned_coords.shape[0]} left, but {num_landmarks} requested).")
+
+    # Step 2: Max-min sampling on cleaned data
+    downsampled_coords_A, local_indices_dsa = maxmin_sampling(cleaned_coords, num_landmarks, random_state=23)
+    
+    # Step 3: Map local indices back to original sliceA indices
+    indices_dsa = cleaned_indices[local_indices_dsa]
+
+    # Create downsampled AnnData
+    downsampled_sliceA = sliceA[indices_dsa].copy()
+
+    return downsampled_sliceA, indices_dsa, cleaned_indices
+
 
 def downsample_slice_by_window(
     sliceA,

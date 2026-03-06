@@ -2,13 +2,14 @@
 
 [![Docs](https://readthedocs.org/projects/raftup-repo/badge/?version=latest)](https://raftup-repo.readthedocs.io/en/latest/)
 
-📖 Documentation: https://raftup-repo.readthedocs.io/en/latest/
+Documentation: https://raftup-repo.readthedocs.io/en/latest/
 
-RAFT-UP is under active development.
+RAFT-UP is a Python package for robust alignment of spatial transcriptomics data under partial overlap.
 
-try 
+## Installation
 
-#bash
-python scripts/verify_modules.py 
+Clone the repository and install in editable mode:
 
-to verify core modules after installation.
+```bash
+conda activate raftup
+pip install -e .

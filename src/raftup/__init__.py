@@ -7,4 +7,5 @@ __all__ = [
     "_metrics_two_gpr",
     "_fsgw_utils",
     "_recoverfull_new_new_knn",
+    "_gene_cost_somde",
 ]

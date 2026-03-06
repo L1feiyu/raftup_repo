@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import scipy.sparse
 
 # for loading DLPFC12 data
-def load_DLPFC(root_dir='/Users/salovjade/Library/CloudStorage/Dropbox/RAFTUP_after0320/DLPFC12', section_id='151507'):
+def load_DLPFC(root_dir='/Users/salovjade/Library/CloudStorage/Dropbox/RAFTUP_after0320/raftup_reproduce/1_DLPFC_all_exp/DLPFC12', section_id='151507'):
     # 151507, ..., 151676 12 in total
     ad = sc.read_visium(path=os.path.join(root_dir, section_id), count_file=section_id+'_filtered_feature_bc_matrix.h5')
     ad.var_names_make_unique()
@@ -23,7 +23,7 @@ def load_DLPFC(root_dir='/Users/salovjade/Library/CloudStorage/Dropbox/RAFTUP_af
 
 
 # for loading mHypothalamus data
-def load_mHypothalamus(root_dir='/Users/salovjade/Library/CloudStorage/Dropbox/RAFTUP_after0320/mHypothalamus', section_id='0.26'):
+def load_mHypothalamus(root_dir='/Users/salovjade/Library/CloudStorage/Dropbox/RAFTUP_after0320/raftup_reproduce/2_MERFISH_all_exp/mHypothalamus', section_id='0.26'):
     # section id = '0.26', '0.21', '0.16', '0.11', '0.06', '0.01', '-0.04', '-0.09', '-0.14', '-0.19', '-0.24', '-0.29' 12 in total
     # cluster =     15      15      14      15      15      15      14       15       15       15      16        15
     info_file = os.path.join(root_dir, 'MERFISH_Animal1_info.xlsx')

@@ -1,25 +1,33 @@
-"""
-Compute gene cost matrix using SOMDE-selected genes and spatial graph
-representation learning (DGI + ScanIT).
-
-Pipeline
---------
-1. Assume sliceA and sliceB are AnnData objects with:
-   - log-normalized expression
-   - SOMDE-selected genes already subset
-2. Construct spatial graphs using ScanIT (alpha-shape)
-3. Learn spatial embeddings independently via Deep Graph Infomax (DGI)
-4. Compute gene cost matrix as pairwise L2 distance between embeddings
-
-Author: RAFT-UP
-"""
-
-from pathlib import Path
-import random
+import os, random
 import numpy as np
 import torch
+
+seed = 0
+
+# Limit CPU nondeterminism from parallel reductions
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+torch.set_num_threads(1)
+
+# Seeds
+random.seed(seed)
+np.random.seed(seed)
+torch.manual_seed(seed)
+
+# Ask PyTorch to error if it hits known nondeterministic ops
+torch.use_deterministic_algorithms(True)
+
+from pathlib import Path
 import torch.nn as nn
-import scipy.sparse
+import networkx as nx
+import scipy.sparse as sp_sparse
+
+# ---- compat for networkx>=3 and SCAN-IT ----
+if not hasattr(nx, "to_scipy_sparse_matrix") and hasattr(nx, "to_scipy_sparse_array"):
+    def _to_scipy_sparse_matrix(G, **kwargs):
+        return sp_sparse.csr_matrix(nx.to_scipy_sparse_array(G, **kwargs))
+    nx.to_scipy_sparse_matrix = _to_scipy_sparse_matrix
+
 import scanit
 from torch_geometric.nn import GCNConv, DeepGraphInfomax
 
@@ -92,8 +100,8 @@ def iterSliceTrain(
     # ------------------
     # Data
     # ------------------
-    X_A = sliceA.X.toarray() if scipy.sparse.issparse(sliceA.X) else sliceA.X
-    X_B = sliceB.X.toarray() if scipy.sparse.issparse(sliceB.X) else sliceB.X
+    X_A = sliceA.X.toarray() if sp_sparse.issparse(sliceA.X) else sliceA.X
+    X_B = sliceB.X.toarray() if sp_sparse.issparse(sliceB.X) else sliceB.X
 
     edge_A = sparse_mx_to_edge_index(sliceA.obsp["scanit-graph"]).to(device)
     edge_B = sparse_mx_to_edge_index(sliceB.obsp["scanit-graph"]).to(device)

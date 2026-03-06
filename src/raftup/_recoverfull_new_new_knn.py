@@ -4,6 +4,105 @@ import numpy as np
 import pandas as pd
 from scipy import sparse
 
+def recover_full_mapping_relative(
+    M,
+    X1, 
+    X2, 
+    P, 
+    idx1, 
+    idx2,
+    pruned_P = False, 
+    delta = 0.5,
+    eps: float = 5e-2,
+    thresh_CGW_ratio: float = 0.5,
+    thresh_CCC: float = 0.65,
+    weight: float = 0.1,
+    nitermax: int = 2e4,
+    stopthr: float = 1e-8,
+    p_cost = 2
+):
+    steps = 8
+    pbar = tqdm(total=steps, desc="recover_full_mapping", leave=False)
+
+    D1 = distance_matrix(X1, X1[idx1,:])
+    D2 = distance_matrix(X2, X2[idx2,:])
+    pbar.update(1)
+
+    n1, n1_sub = D1.shape
+    n2, n2_sub = D2.shape
+
+    a = np.ones(n1) / n1
+    b = np.ones(n2) / n2
+    if pruned_P:
+        P_sig = P
+        D1_sig = D1
+        D2_sig = D2
+    else:
+        tmp_idx1 = np.where(P.sum(axis=1) >= delta / n1_sub)[0]
+        tmp_idx2 = np.where(P.sum(axis=0) >= delta / n2_sub)[0]
+        P_sig = P[tmp_idx1,:][:,tmp_idx2]
+        D1_sig = D1[:,tmp_idx1]
+        D2_sig = D2[:,tmp_idx2]
+    pbar.update(1)
+
+    P_sig_1_to_2 = P_sig.copy() / P_sig.sum(axis=1).reshape(-1,1)
+    P_sig_2_to_1 = ( P_sig.copy() / P_sig.sum(axis=0).reshape(1,-1) ).T
+    D1_to_D2 = np.matmul(D1_sig, P_sig_1_to_2)
+    D2_to_D1 = np.matmul(D2_sig, P_sig_2_to_1)
+    pbar.update(1)
+
+    C1 = distance_matrix(D1_sig, D2_to_D1, p=p_cost)
+    C2 = distance_matrix(D1_to_D2, D2_sig, p=p_cost)
+
+    # diff_in_C1 = D1_sig[:, None, :] - D2_to_D1[None, :, :]
+    # diff_in_C2 = D1_to_D2[:, None, :] - D2_sig[None, :, :]
+
+    diff_in_C1_tmp = np.abs(D1_sig[:, None, :] - D2_to_D1[None, :, :])
+    diff_in_C1_tmp_min = np.minimum(D1_sig[:, None, :], D2_to_D1[None, :, :])
+
+    diff_in_C2_tmp = np.abs(D1_to_D2[:, None, :] - D2_sig[None, :, :])
+    diff_in_C2_tmp_min = np.minimum(D1_to_D2[:, None, :], D2_sig[None, :, :])
+
+    mask = (np.any(diff_in_C1_tmp > thresh_CGW_ratio * diff_in_C1_tmp_min, axis=2) | 
+            np.any(diff_in_C2_tmp > thresh_CGW_ratio * diff_in_C2_tmp_min, axis=2))
+    zero_indices_C = np.where(mask)
+
+    print("Number of blocked positions in recover_full sot:", np.sum(mask))
+    print("Number of possble aligned positions in recover_full sot:", np.sum(~mask))
+    pbar.update(1)
+
+    C = 0.5 * (C1 + C2)
+    C_percentile_99 = np.percentile(C, 99)
+    C_capped = np.minimum(C, C_percentile_99)
+    C_norm = C_capped / C_percentile_99
+    matrix_rescaling_checking(C_norm)
+    C_norm += 1e-10
+    pbar.update(1)
+
+    M_percentile_99 = np.percentile(M, 99)
+    M_capped = np.minimum(M, M_percentile_99)
+    M_norm = M_capped / M_percentile_99
+    matrix_rescaling_checking(M_norm)
+    M_norm += 1e-10
+    pbar.update(1)
+
+    CM = weight * C_norm + (1 - weight) * M_norm
+    CM[zero_indices_C] = 0
+    CM[M > thresh_CCC] = 0
+
+    CM_sparse = sparse.coo_matrix(CM)
+    CM_sparse.data -= 1e-10
+    CM_sparse = CM_sparse / CM_sparse.max()
+    pbar.update(1)
+
+    m = 2
+    P_full = sot_sinkhorn_l1_sparse(a, b, CM_sparse, eps, m, nitermax=nitermax, stopthr=stopthr, verbose=True)
+
+    pbar.update(1)
+    pbar.close()
+
+    return P_full
+
 def matrix_rescaling_checking(C_norm, verbose=True, atol=1e-12):
     min_val = C_norm.min()
     max_val = C_norm.max()
@@ -16,7 +115,8 @@ def matrix_rescaling_checking(C_norm, verbose=True, atol=1e-12):
     if verbose:
         print(f"After rescaling: min = {min_val}, max = {max_val}.")
 
-def generate_binary_matching(sliceA, downsampled_sliceA, sliceB, downsampled_sliceB, P, cutoff_GW, cutoff_CC, output_dir):
+
+def generate_binary_matching_relative(sliceA, downsampled_sliceA, sliceB, downsampled_sliceB, P, output_dir):
     """
     Generate a binary matching matrix L_sig and derive L_full for alignment.
     
@@ -84,7 +184,7 @@ def generate_binary_matching(sliceA, downsampled_sliceA, sliceB, downsampled_sli
 
     return L_sig, L_full, indices_A_matching_part, indices_B_matching_part
 
-import numpy as np
+
 from scipy.spatial import distance_matrix
 
 # GW cost in recovering stage
@@ -331,8 +431,8 @@ def recover_full_mapping_knn(
     P,          # subslice transport plan (n1_sub x n2_sub)
     idx1,       # indices (in X1) of subslice-1 anchors, len n1_sub
     idx2,       # indices (in X2) of subslice-2 anchors, len n2_sub
-    k1=32,      # kNN size in slice-1 anchor space (for C1)
-    k2=32,      # kNN size in slice-2 anchor space (for C2)
+    k1=6,      # kNN size in slice-1 anchor space (for C1)
+    k2=6,      # kNN size in slice-2 anchor space (for C2)
     pruned_P = False, 
     delta = 0.5,
     eps: float = 5e-3,
