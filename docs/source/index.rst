@@ -11,7 +11,7 @@ Welcome to RAFT-UP's documentation!
    :caption: Contents:
    
    installation
-   tutorials
+   tutorials/index
    experiments
 
 
