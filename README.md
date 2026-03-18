@@ -21,7 +21,7 @@ Some important parameters used in RAFT-UP include:
 - `rho_s`: spatial distance cutoff used in the downsampled alignment stage.
 - `rho_f2`: gene-expression cutoff used in the full-resolution recovery stage.
 - `rho_t`: spatial distance cutoff used in the full-resolution recovery stage.
-- `k1`, `k2`: nearest-neighbor parameters used in recovery and refinement.
+- `k1`, `k2`: nearest-neighbor parameters used for construction of spatial cost in the full-resolution recovery stage.
 
 ## Installation
 
