@@ -6,20 +6,22 @@ It provides tools for preprocessing, gene-cost construction, downsampling-based 
 ## Basic usage
 
 A typical workflow in RAFT-UP includes:
-	1.	Data preprocessing and filter out highly variable genes.
-	2.	Construct the gene cost matrix.
-	3.	Compute downsampled alignment.
-	4.	Recover full-resolution alignment.
-	5.	Visualize the matching results.
-	
+
+1. Data preprocessing and filtering out highly variable genes.
+2. Construct the gene cost matrix.
+3. Compute downsampled alignment.
+4. Recover full-resolution alignment.
+5. Visualize the matching results.
+
 ## Key parameters
 
 Some important parameters used in RAFT-UP include:
-	•	rho_f1: gene-expression cutoff used in the downsampled alignment stage.
-	•	rho_s: spatial distance cutoff used in the downsampled alignment stage.
-	•	rho_f2: gene-expression cutoff used in the full-resolution recovery stage.
-	•	rho_t: spatial distance cutoff used in the full-resolution recovery stage.
-	•	k1, k2: nearest-neighbor parameters used in recovery and refinement.
+
+- `rho_f1`: gene-expression cutoff used in the downsampled alignment stage.
+- `rho_s`: spatial distance cutoff used in the downsampled alignment stage.
+- `rho_f2`: gene-expression cutoff used in the full-resolution recovery stage.
+- `rho_t`: spatial distance cutoff used in the full-resolution recovery stage.
+- `k1`, `k2`: nearest-neighbor parameters used in recovery and refinement.
 
 ## Installation
 
