@@ -12,11 +12,12 @@ git clone https://github.com/L1feiyu/raftup_repo.git
 cd raftup_repo
 conda activate raftup
 pip install -e .
+```md
 
 ## Basic usage
 
 A typical workflow in RAFT-UP includes:
-	1.	Data preprocessing and filter out highly varaible genes.
+	1.	Data preprocessing and filter out highly variable genes.
 	2.	Construct the gene cost matrix.
 	3.	Compute downsampled alignment.
 	4.	Recover full-resolution alignment.
@@ -30,4 +31,3 @@ Some important parameters used in RAFT-UP include:
 	•	rho_f2: gene-expression cutoff used in the full-resolution recovery stage.
 	•	rho_t: spatial distance cutoff used in the full-resolution recovery stage.
 	•	k1, k2: nearest-neighbor parameters used in recovery and refinement.
-	•	P: transport / matching matrix between two slices.	
