@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "raftup"
-version = "0.1.0"
+version = "0.1.1"
 description = "RAFT-UP: Robust Alignment for Spatial Transcriptomics under Partial Overlapping"
 readme = "README.md"
 requires-python = ">=3.10"
