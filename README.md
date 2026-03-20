@@ -1,7 +1,7 @@
 # RAFT-UP
 
-RAFT-UP is a Python package for robust alignment of spatial transcriptomics data.  
-It provides tools for preprocessing, gene-cost construction, downsampling-based matching, full-resolution recovery, and visualization of alignment results.
+RAFT-UP is a tool for robust spatial transcriptomics data alignment that infers overlap portion and provides explicit control over spatial distance
+preservation. It provides tools for preprocessing, gene-cost construction, downsampling-based matching, full-resolution recovery, and visualization of alignment results.
 
 ![RAFT-UP overview](docs/source/_static/results/Figure_1_overview.png)
 
