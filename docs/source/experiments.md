@@ -3,7 +3,7 @@
 This page documents representative experiments reproduced using the
 packaged **RAFT-UP** implementation.
 
-Details of every experiment are listed in https://github.com/L1feiyu/raftup_repo/tree/main/examples.
+Details of every experiment are reported in https://github.com/L1feiyu/raftup_repo/tree/main/examples.
 
 ---
 
@@ -50,7 +50,7 @@ Details of every experiment are listed in https://github.com/L1feiyu/raftup_repo
 
 ## Overlapping-window alignment (synthetic regular window)
 
-![Overlapping regular window alignment](_static/results/raftup_small_window_1.png)
+![Overlapping regular window alignment](_static/results/test_3_raftup.png)
 
 **Setting**
 - Dataset: DLPFC 151675 window - DLPFC 151675 window 
@@ -61,7 +61,7 @@ Details of every experiment are listed in https://github.com/L1feiyu/raftup_repo
 
 ## Overlapping-window alignment (synthetic irregular window)
 
-![Overlapping irregular window alignment](_static/results/raftup_small_window_2.png)
+![Overlapping irregular window alignment](_static/results/test_2_raftup.png)
 
 **Setting**
 - Dataset: DLPFC 151675 window - DLPFC 151675 window
