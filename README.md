@@ -15,6 +15,8 @@ A typical workflow in RAFT-UP includes:
 4. Recover full-resolution alignment.
 5. Visualize the matching results.
 
+More details and tutorials are available at https://raftup-repo.readthedocs.io/en/latest/.
+
 ## Key parameters
 
 Some important parameters used in RAFT-UP include:
@@ -53,4 +55,3 @@ Create the Mayavi environment for RAFT-UP visualization with:
 conda create -n mayavi_env -c conda-forge python=3.11 mayavi pyqt scanpy ipykernel openpyxl "numpy<2.4"
 conda activate mayavi_env
 ```
-
