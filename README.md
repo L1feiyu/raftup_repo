@@ -9,11 +9,11 @@ preservation. It provides tools for preprocessing, gene-cost construction, downs
 
 A typical workflow in RAFT-UP includes:
 
-1. Data preprocessing and filtering out highly variable genes.
-2. Construct the gene cost matrix.
-3. Compute downsampled alignment.
-4. Recover full-resolution alignment.
-5. Visualize the matching results.
+1. Preprocess the input slices and identify spatially variable genes using SOMDE.
+2. Construct the gene cost matrix using spatial representation learning.
+3. Compute the downsampled alignment.
+4. Recover the full-resolution alignment.
+5. Visualize and evaluate the matching results.
 
 More details and tutorials are available at https://raftup-repo.readthedocs.io/en/latest/.
 
@@ -29,21 +29,39 @@ Some important parameters used in RAFT-UP include:
 
 ## Installation
 
-### Main RAFT-UP environment
+### Recommended installation
 
-Clone the repository and install RAFT-UP in editable mode:
+RAFT-UP uses several scientific Python packages with version-sensitive dependencies.  
+
+For a reproducible installation, we recommend creating the provided Conda environment.
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/L1feiyu/raftup_repo.git
 cd raftup_repo
-conda create -n raftup python=3.10
-conda activate raftup
-pip install -e .
 ```
-To verify that RAFT-UP is imported from the local repository, run:
+
+Create and activate the RAFT-UP environment:
+
 ```bash
-python -c "import raftup; print(raftup.__file__)"
+conda env create -f environment.yml
+conda activate raftup
 ```
+The environment installs RAFT-UP together with the dependencies required for the complete workflow, including:
+
+* SOMDE for spatially variable gene detection
+* SCAN-IT for spatial representation learning and gene-cost construction
+* PyTorch and PyTorch Geometric
+* SOMOCLU and GUDHI
+* Scanpy and Squidpy
+
+To verify the installation, run:
+
+```bash
+python -c "import raftup; print(raftup.__version__)"
+```
+
 
 ### Optional Mayavi environment
 
