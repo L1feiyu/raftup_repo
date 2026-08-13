@@ -12,17 +12,31 @@ license = {text = "MIT"}
 authors = [{name = "RAFT-UP developers"}]
 
 dependencies = [
+
     "numpy",
+
     "scipy",
+
     "pandas",
+
     "networkx",
+
     "tqdm",
+
     "matplotlib",
+
     "seaborn",
+
+    "plotly",
+
     "scikit-learn",
+
     "scanpy",
+
     "squidpy",
+
     "setuptools<81",
+
 ]
 
 [tool.setuptools]

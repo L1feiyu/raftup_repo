@@ -1,0 +1,37 @@
+name: raftup
+
+channels:
+
+  - conda-forge
+
+  - defaults
+
+dependencies:
+
+  - python=3.10
+
+  - pip
+
+  - setuptools<81
+
+  - numpy=1.26.4
+
+  - scipy=1.11.4
+
+  - somoclu
+
+  - gudhi
+
+  - jupyterlab
+
+  - ipykernel
+
+  - pip:
+
+      - torch==2.1.0
+
+      - torch-geometric==2.6.1
+
+      - somde==0.1.8
+
+      - git+https://github.com/zcang/SCAN-IT.git
