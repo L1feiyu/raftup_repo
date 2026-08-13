@@ -1,18 +1,53 @@
 [build-system]
+
 requires = ["setuptools>=68", "wheel"]
+
 build-backend = "setuptools.build_meta"
 
 [project]
+
 name = "raftup"
-version = "0.1.1"
+
+version = "0.1.2"
+
 description = "RAFT-UP: Robust Alignment for Spatial Transcriptomics under Partial Overlapping"
+
 readme = "README.md"
-requires-python = ">=3.10"
+
+requires-python = ">=3.10,<3.13"
+
 license = {text = "MIT"}
+
 authors = [{name = "RAFT-UP developers"}]
 
+dependencies = [
+
+    "numpy",
+
+    "scipy",
+
+    "pandas",
+
+    "networkx",
+
+    "tqdm",
+
+    "matplotlib",
+
+    "seaborn",
+
+    "scikit-learn",
+
+    "scanpy",
+
+    "squidpy",
+
+]
+
 [tool.setuptools]
+
 package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
+
 where = ["src"]
