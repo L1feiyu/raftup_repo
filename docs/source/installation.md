@@ -7,7 +7,7 @@ Clone the repository and install RAFT-UP in editable mode:
 ```bash
 git clone https://github.com/L1feiyu/raftup_repo.git
 cd raftup_repo
-conda create -n raftup python=3.10
+conda env create -f environment.yml
 conda activate raftup
 pip install -e .
 ```
