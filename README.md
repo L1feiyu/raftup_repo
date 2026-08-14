@@ -29,7 +29,7 @@ Some important parameters used in RAFT-UP include:
 
 ## Installation
 
-### Recommended installation
+### Main installation
 
 RAFT-UP uses several scientific Python packages with version-sensitive dependencies.  
 
@@ -47,19 +47,19 @@ Create and activate the RAFT-UP environment:
 ```bash
 conda env create -f environment.yml
 conda activate raftup
+pip install -e .
 ```
-The environment installs RAFT-UP together with the dependencies required for the complete workflow, including:
 
-* SOMDE for spatially variable gene detection
-* SCAN-IT for spatial representation learning and gene-cost construction
-* PyTorch and PyTorch Geometric
-* SOMOCLU and GUDHI
-* Scanpy and Squidpy
+Install RAFT-UP from the cloned repository:
+
+```bash
+pip install -e .
+```
 
 To verify the installation, run:
 
 ```bash
-python -c "import raftup; print(raftup.__version__)"
+python -c "import raftup; print(raftup.__version__); print(raftup.__file__)"
 ```
 
 
