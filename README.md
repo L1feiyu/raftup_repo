@@ -47,7 +47,6 @@ Create and activate the RAFT-UP environment:
 ```bash
 conda env create -f environment.yml
 conda activate raftup
-pip install -e .
 ```
 
 Install RAFT-UP from the cloned repository:
