@@ -15,6 +15,22 @@ A typical workflow in RAFT-UP includes:
 4. Recover the full-resolution alignment.
 5. Visualize and evaluate the matching results.
 
+The main end-to-end tutorial is located at:
+```bash
+examples/DLPFC_tutorial/RAFTUP_end_to_end_pipeline.ipynb
+```
+For users with two prepared spatial transcriptomics .h5ad files, update the User configuration section of the notebook with the paths to the two AnnData objects.
+
+For more detailed control of preprocessing, gene-cost construction, downsampled alignment, and full-resolution recovery, see:
+```bash
+0_somde_robust_scanpy.ipynb
+
+1_DLPFC_gene_cost_by_somde.ipynb
+
+2_alignment_step1_ds_turbo.ipynb
+
+2_alignment_step2_rf.ipynb
+```
 More details and tutorials are available at https://raftup-repo.readthedocs.io/en/latest/.
 
 ## Key parameters
