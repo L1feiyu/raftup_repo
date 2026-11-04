@@ -46,4 +46,4 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [project.optional-dependencies]
-revision = ["anndata>=0.11,<0.12", "torch==2.1.0", "torch-geometric==2.6.1", "gudhi", "somoclu", "somde==0.1.8", "nbformat", "nbclient", "ipykernel", "jupyterlab", "pillow"]
+revision = ["anndata>=0.11,<0.12", "torch==2.2.2", "torch-geometric==2.6.1", "gudhi", "somoclu", "somde==0.1.8", "nbformat", "nbclient", "ipykernel", "jupyterlab", "pillow"]

@@ -1,5 +1,5 @@
 # Revision environment. SCAN-IT is pinned to the locally verified source revision.
-# PyTorch GPU availability depends on OS/driver; the notebooks print the active device.
+# PyTorch GPU availability depends on OS/driver; check torch.cuda.is_available() before GPU training.
 name: raftup_revision
 channels:
   - conda-forge
@@ -17,7 +17,7 @@ dependencies:
       - scanpy==1.11.5
       - squidpy==1.6.5
       - scikit-learn==1.7.2
-      - torch==2.1.0
+      - torch==2.2.2
       - torch-geometric==2.6.1
       - somde==0.1.8
       - git+https://github.com/zcang/SCAN-IT.git@ebf38949eea9348cd1791f392789a8a8c0ae1e47

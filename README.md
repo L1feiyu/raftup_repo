@@ -8,7 +8,7 @@ Start with [revision installation and notebooks](examples/revision/README.md). E
 from raftup import run_automated_alignment, run_manual_alignment
 ```
 
-See [CHANGELOG.md](CHANGELOG.md) for scope and validation limits. Saved paper results are external input data, not bundled with the Python package.
+See [VALIDATION.md](examples/revision/VALIDATION.md) for execution checks and [DATA.md](examples/revision/DATA.md) for download links and portable input paths. Saved paper results are external input data, not bundled with the Python package.
 
 ---
 
@@ -68,7 +68,7 @@ For a reproducible installation, we recommend creating the provided Conda enviro
 Clone the repository:
 
 ```bash
-git clone https://github.com/L1feiyu/raftup_repo.git
+git clone --branch revision https://github.com/L1feiyu/raftup_repo.git
 cd raftup_repo
 ```
 
@@ -82,7 +82,7 @@ conda activate raftup_revision
 Install RAFT-UP from the cloned repository:
 
 ```bash
-pip install -e .
+python -m pip install -e '.[revision]'
 ```
 
 To verify the installation, run:

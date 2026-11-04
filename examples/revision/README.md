@@ -13,7 +13,13 @@ python -m pip install -e '.[revision]'
 python -m ipykernel install --user --name raftup_revision --display-name 'Python (raftup_revision)'
 ```
 
-The environment definition is based on the existing verification environment; a new cross-platform Conda solve and Linux GPU run have not yet been validated. SCAN-IT is pinned to a commit. PyTorch 2.1.0 is retained for reproducibility. GPU training requires a compatible Linux/CUDA installation; report `torch.__version__`, `torch.version.cuda`, and `torch.cuda.is_available()` before training. Saved feature-cost alignment and plotting do not require GPU training. Competing alignment methods keep their separate environments.
+The revision environment uses PyTorch 2.2.2; the previous 2.1.0 macOS wheel had incorrect architecture metadata. SCAN-IT is pinned to a commit. See VALIDATION.md for the fresh-environment execution report; Linux GPU execution is a separate check. GPU training requires a compatible Linux/CUDA installation; report `torch.__version__`, `torch.version.cuda`, and `torch.cuda.is_available()` before training. Saved feature-cost alignment and plotting do not require GPU training. Competing alignment methods keep their separate environments.
+
+Before GPU feature training, check the active installation:
+
+```sh
+python -c "import torch; print(torch.__version__, torch.version.cuda, torch.cuda.is_available())"
+```
 
 ## Package-call tutorials
 
@@ -28,7 +34,7 @@ The environment definition is based on the existing verification environment; a 
 | 06_downsampling | Explicit fixed-cutoff sampling sweep |
 | 07_spatial_distortion | Exact final-support spatial audit |
 
-Each real-data tutorial takes prepared inputs, not bundled raw datasets. Copy `pair.example.json` to `pair.json` next to your prepared data and edit it. Set `RAFTUP_TUTORIAL_DATA` to that directory. File paths inside the manifest resolve relative to the manifest itself. Set `RAFTUP_OUTPUT_ROOT` to a fresh output directory. Outputs do not modify the source data. Do not reuse output directories for changed configurations.
+Download links and preparation commands are in [DATA.md](DATA.md). Each real-data tutorial takes prepared inputs, not bundled raw datasets. Copy `pair.example.json` to `pair.json` next to your prepared data and edit it. Set `RAFTUP_TUTORIAL_DATA` to that directory. File paths inside the manifest resolve relative to the manifest itself. Set `RAFTUP_OUTPUT_ROOT` to a fresh output directory. Outputs do not modify the source data. Do not reuse output directories for changed configurations.
 
 Required files:
 - `slice_a.h5ad`, `slice_b.h5ad`: unique observation IDs, expression data and finite two-dimensional `obsm['spatial']`.
@@ -49,3 +55,14 @@ The exact input paths are visible in each figure's data cells. `source_manifest.
 ## Output compatibility
 
 The public API remains `import raftup`. Old private modules are retained. `run_automated_alignment` and `run_manual_alignment` return `(P, decision)`. The revision helper functions live in `raftup.experiments`. Raw alignment matrices, fitted coordinates and high-dimensional embeddings are different objects: use spatial coordinates for the purity metric.
+
+## Execute in the active environment
+
+```sh
+python scripts/execute_revision_notebooks.py --mode tutorials \
+  --input-root /path/to/prepared_inputs --output-dir .validation/tutorials
+python scripts/execute_revision_notebooks.py --mode figures \
+  --archive-root /path/to/revision_archive --output-dir .validation/figures
+```
+
+The runner creates a temporary kernel specification for the active Python, executes every code cell, and writes executed copies plus per-notebook pass/fail reports outside the source notebooks. Add `--notebook 01` to select one notebook. Use a new output directory for each run. Historical records in `protocol_sources/` are provenance copies, not supported portable tutorial entry points; their original machine paths are intentionally not used by this runner.

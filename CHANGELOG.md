@@ -8,4 +8,4 @@
 - Add revision environment configuration, pinned SCAN-IT source and provenance records.
 - Keep old tutorials; retain original environment as environments/environment-legacy.yml.
 
-This is a development package, not a published release or independently validated general parameter selector. New real-data experiments and competitor training have not been rerun merely for packaging.
+This is a development package, not a published release or independently validated general parameter selector. All 13 supported revision notebooks were executed in a fresh CPU environment on the inputs specified in [VALIDATION.md](examples/revision/VALIDATION.md). Full benchmark and competing-method training were not rerun; Linux/CUDA remains untested.

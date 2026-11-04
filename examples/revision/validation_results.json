@@ -1,0 +1,121 @@
+{
+  "validation_date": "2026-11-04",
+  "environment": "Fresh Conda Python 3.10, macOS arm64, CPU; PyTorch 2.2.2",
+  "dependency_check": "pip check passed",
+  "notebooks": [
+    {
+      "notebook": "examples/revision/00_installation_smoke_test.ipynb",
+      "status": "passed",
+      "seconds": 15.61,
+      "scope": "Four-cell synthetic pair; actual manual solver.",
+      "code_sha256": "3948e1b7bd45ed19b3e09065598f2d9586fd9b3b5b31611d619da7739fd9b0ef"
+    },
+    {
+      "notebook": "examples/revision/01_automated_DLPFC.ipynb",
+      "status": "passed",
+      "seconds": 437.68,
+      "scope": "Full DLPFC 151507–151508 pair (4,221 × 4,381 spots), archived feature cost; automatic selection and recovery.",
+      "code_sha256": "f91eb8fad14b6815e614bf13c369bc04e2edc58043303cbc17fc77b10b241338",
+      "historical_comparison": {
+        "same_support": true,
+        "max_abs_difference": 0.0,
+        "new_nnz": 28708
+      }
+    },
+    {
+      "notebook": "examples/revision/02_automated_MERFISH.ipynb",
+      "status": "passed",
+      "seconds": 308.73,
+      "scope": "Full MERFISH -0.04/-0.09 pair (5,488 × 5,557 cells), archived feature cost; automatic selection and recovery.",
+      "code_sha256": "03199f499e1618b88a2a96916f997a336f78a5fe04119af8da0b9328861b5ead",
+      "historical_comparison": {
+        "same_support": true,
+        "max_abs_difference": 0.0,
+        "new_nnz": 23321
+      }
+    },
+    {
+      "notebook": "examples/revision/03_known_overlap.ipynb",
+      "status": "passed",
+      "seconds": 32.89,
+      "scope": "One same-section DLPFC cropped-window pair (166 × 199 spots), experimental routing and exact correspondence evaluation; 87 shared original barcodes verified by array positions.",
+      "code_sha256": "bc6eae519a40a5c047eba8212a74da20bda03d1c0fb234d405a2c253be3dbf3d"
+    },
+    {
+      "notebook": "examples/revision/04_3d_reconstruction.ipynb",
+      "status": "passed",
+      "seconds": 847.68,
+      "scope": "One real Deep-STARmap adjacent pair 13–14 (9,059 × 8,223 cells), automatic selection, rigid placement and output saving; not the complete 15-section rerun.",
+      "code_sha256": "1cb75a7fdab08528eae25b8c1ee25d9d1ecd903b73f5e95aeee322560bbce1b1",
+      "historical_comparison": {
+        "same_support": true,
+        "max_abs_difference": 0.0,
+        "new_nnz": 5376
+      }
+    },
+    {
+      "notebook": "examples/revision/05_HT206B1_nonbrain.ipynb",
+      "status": "passed",
+      "seconds": 196.53,
+      "scope": "Full HT206B1 U2–U3 pair (3,949 × 4,311 spots), manual alignment, weighted rigid placement and spatial-MNN purity with 100 µm distance gate.",
+      "code_sha256": "c9bd1e199ce680aaf51fdb3f62efb65e70502c6be7824ff2b41afb13155da757",
+      "historical_comparison": {
+        "same_support": true,
+        "max_abs_difference": 0.0,
+        "purity_spearman": 0.5649255943731617,
+        "purity_MAE": 0.09409506817866597,
+        "n_spatial_MNN_pairs": 3413
+      }
+    },
+    {
+      "notebook": "examples/revision/06_downsampling.ipynb",
+      "status": "passed",
+      "seconds": 1181.53,
+      "scope": "Fresh DLPFC 151507–151508 sweep at 2%, 4%, 5%, 6.7%, 8%, 10%; all six full alignments with fixed costs/cutoffs.",
+      "code_sha256": "6e6109aa78c94982dec81bbd7194c56c9ff48008abf740d4eb43414e06f8b3c1"
+    },
+    {
+      "notebook": "examples/revision/07_spatial_distortion.ipynb",
+      "status": "passed",
+      "seconds": 8.95,
+      "scope": "Exact audit of the newly computed DLPFC final support, including pairs sharing endpoints; recorded 200 µm recovery cutoff.",
+      "code_sha256": "ecbe2c0f2bb2d38f00cdce802ac65c9a6182298b8b6efb337815e11b321c3196"
+    },
+    {
+      "notebook": "examples/revision/figures/01_known_overlap.ipynb",
+      "status": "passed",
+      "seconds": 57.58,
+      "scope": "All figure cells using the archived partial-overlap results; no competitor retraining.",
+      "code_sha256": "f7bcfc466fe83aea68009b7e60f75355a300f8c780ad93712879495b555d0c87"
+    },
+    {
+      "notebook": "examples/revision/figures/02_3d_reconstruction.ipynb",
+      "status": "passed",
+      "seconds": 173.43,
+      "scope": "All figure cells including nRMSE, mean bars and full saved 3D reconstruction; no new full-volume alignment.",
+      "code_sha256": "b82cbd4a0e777e3e31e9f9f3c79d3e9a26cc2737c35f7826ca450ac262358da1"
+    },
+    {
+      "notebook": "examples/revision/figures/03_HT206B1_nonbrain.ipynb",
+      "status": "passed",
+      "seconds": 50.75,
+      "scope": "All figure cells using saved histology, purity and method coordinates; 27 internal checks passed.",
+      "code_sha256": "3855a76328499562b58563b2dd420789211d25d5df02bd32198b2b5265f8be43"
+    },
+    {
+      "notebook": "examples/revision/figures/04_downsampling.ipynb",
+      "status": "passed",
+      "seconds": 58.48,
+      "scope": "All figure cells using the historical 17 runs plus supplemental run; 15 plots generated.",
+      "code_sha256": "babec6ee2b054d801cdd7385d1cedf43afcacfeb8f8930db875d4f349e625741"
+    },
+    {
+      "notebook": "examples/revision/figures/05_spatial_distortion.ipynb",
+      "status": "passed",
+      "seconds": 86.69,
+      "scope": "All figure cells using the archived audit; 51 source-table checks passed.",
+      "code_sha256": "b7ddbf3e3bc7c165090b5c0276cf4bf179ffd56ca90baf6a5123b58fed11102e"
+    }
+  ],
+  "excluded": "Historical protocol_sources and legacy tutorials; Linux/CUDA; complete benchmark/competitor retraining; full SCAN-IT training."
+}

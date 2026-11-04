@@ -31,3 +31,9 @@ dist/
 # Local packaging and notebook validation artifacts
 build/
 .validation/
+
+# Prepared tutorial data and local validation
+prepared_inputs/
+revision_data/
+**/outputs/
+**/executed_notebooks/
