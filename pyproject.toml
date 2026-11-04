@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "raftup"
-version = "0.1.2"
+version = "0.2.0.dev0"
 description = "RAFT-UP: Robust Alignment for Spatial Transcriptomics under Partial Overlapping"
 readme = "README.md"
 requires-python = ">=3.10,<3.13"
@@ -13,9 +13,9 @@ authors = [{name = "RAFT-UP developers"}]
 
 dependencies = [
 
-    "numpy",
+    "numpy>=1.26,<2",
 
-    "scipy",
+    "scipy>=1.11,<1.12",
 
     "pandas",
 
@@ -44,3 +44,6 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[project.optional-dependencies]
+revision = ["anndata>=0.11,<0.12", "torch==2.1.0", "torch-geometric==2.6.1", "gudhi", "somoclu", "somde==0.1.8", "nbformat", "nbclient", "ipykernel", "jupyterlab", "pillow"]

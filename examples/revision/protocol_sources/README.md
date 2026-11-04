@@ -1,0 +1,1 @@
+Archived protocol source, outputs removed. These records retain historical paths and are not portable tutorials. Use the notebooks one directory above for package calls, and figures/ for exact saved-result reproduction. No models or datasets are bundled.

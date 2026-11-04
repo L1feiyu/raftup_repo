@@ -1,0 +1,27 @@
+[
+  {
+    "notebook": "figures/01_known_overlap.ipynb",
+    "source": "reviewer_figure_notebooks_20261016/01_known_overlap.ipynb",
+    "source_sha256": "e202bb67d2de757c5df668644b15f754aae1d8cb48ead8ef901c54674a108b5a"
+  },
+  {
+    "notebook": "figures/02_3d_reconstruction.ipynb",
+    "source": "reviewer_figure_notebooks_20261016/02_3d_reconstruction.ipynb",
+    "source_sha256": "0ad9e7a2ecea7155cba7151f424515a570e8a5907b2ffadf0685a5134f487b74"
+  },
+  {
+    "notebook": "figures/03_HT206B1_nonbrain.ipynb",
+    "source": "reviewer_figure_notebooks_20261016/03_HT206B1_nonbrain.ipynb",
+    "source_sha256": "33deb86c267b7a6d7c00e35b01e4f821e15b728c3fbee047c39bdb8b3956acf4"
+  },
+  {
+    "notebook": "figures/04_downsampling.ipynb",
+    "source": "reviewer_figure_notebooks_20261016/04_downsampling.ipynb",
+    "source_sha256": "0cf51d2242dbb85f50e1439b4a178bdaabf28b170d1565518b57c04bd2133175"
+  },
+  {
+    "notebook": "figures/05_spatial_distortion.ipynb",
+    "source": "reviewer_figure_notebooks_20261016/05_spatial_distortion.ipynb",
+    "source_sha256": "8c66e507ed42bb8f09e9274e313a89f00b6987b02266cfb5c77c6f66860cbe57"
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "name": "dlpfc_0708",
+  "slice_a": "slice_a.h5ad",
+  "slice_b": "slice_b.h5ad",
+  "feature_cost": "feature_cost.npy",
+  "cell_ids_a": "cell_ids_a.json",
+  "cell_ids_b": "cell_ids_b.json",
+  "data_technology": "dlpfc",
+  "pixels_per_100um": 138,
+  "audit_coordinate_scale": [
+    0.7246376811594203,
+    0.7246376811594203
+  ],
+  "audit_spatial_cutoff": 200
+}

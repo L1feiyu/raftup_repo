@@ -1,37 +1,29 @@
-name: raftup
-
+# Revision environment. SCAN-IT is pinned to the locally verified source revision.
+# PyTorch GPU availability depends on OS/driver; the notebooks print the active device.
+name: raftup_revision
 channels:
-
   - conda-forge
-
-  - defaults
-
 dependencies:
-
   - python=3.10
-
   - pip
-
-  - setuptools<81
-
   - numpy=1.26.4
-
   - scipy=1.11.4
-
-  - somoclu
-
-  - gudhi
-
-  - jupyterlab
-
-  - ipykernel
-
+  - somoclu=1.7.6
+  - gudhi=3.13.0
   - pip:
-
+      - setuptools==80.10.2
+      - pandas==2.3.3
+      - anndata==0.11.4
+      - scanpy==1.11.5
+      - squidpy==1.6.5
+      - scikit-learn==1.7.2
       - torch==2.1.0
-
       - torch-geometric==2.6.1
-
       - somde==0.1.8
-
-      - git+https://github.com/zcang/SCAN-IT.git
+      - git+https://github.com/zcang/SCAN-IT.git@ebf38949eea9348cd1791f392789a8a8c0ae1e47
+      - nbformat==5.11.0
+      - nbclient==0.11.0
+      - jupyterlab
+      - ipykernel
+      - pillow
+# After activation run: python -m pip install -e '.[revision]'

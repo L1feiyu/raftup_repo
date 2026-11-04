@@ -1,3 +1,17 @@
+# RAFT-UP revision branch
+
+Package name: **raftup**. Development version: **0.2.0.dev0**. This branch organizes the revision implementation and experiments. The original `main` commit remains unchanged.
+
+Start with [revision installation and notebooks](examples/revision/README.md). Each experiment has a package-call notebook; the five latest manuscript plots are in [figures](examples/revision/figures). Use [environment.yml](environment.yml) for the revision environment; the previous definition is preserved in [environment-legacy.yml](environments/environment-legacy.yml).
+
+```python
+from raftup import run_automated_alignment, run_manual_alignment
+```
+
+See [CHANGELOG.md](CHANGELOG.md) for scope and validation limits. Saved paper results are external input data, not bundled with the Python package.
+
+---
+
 # RAFT-UP
 
 RAFT-UP is a tool for robust spatial transcriptomics data alignment that infers overlap portion and provides explicit control over spatial distance
@@ -62,7 +76,7 @@ Create and activate the RAFT-UP environment:
 
 ```bash
 conda env create -f environment.yml
-conda activate raftup
+conda activate raftup_revision
 ```
 
 Install RAFT-UP from the cloned repository:

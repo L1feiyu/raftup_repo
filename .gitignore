@@ -27,3 +27,7 @@ outputs/
 .Rhistory
 .DS_Store
 dist/
+
+# Local packaging and notebook validation artifacts
+build/
+.validation/
