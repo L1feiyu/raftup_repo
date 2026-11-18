@@ -110,11 +110,11 @@ def downsample_slice_by_window(
     indices_dsa : np.ndarray (int)
     """
     if coord_key not in sliceA.obsm_keys():
-        raise KeyError(f"sliceA.obsm['{coord_key}'] 不存在，可用键：{list(sliceA.obsm_keys())}")
+        raise KeyError(f"sliceA.obsm['{coord_key}'] is missing. Available keys: {list(sliceA.obsm_keys())}")
 
     coords = np.asarray(sliceA.obsm[coord_key])
     if coords.ndim != 2 or coords.shape[1] < 2:
-        raise ValueError(f"sliceA.obsm['{coord_key}'] 形状应为 (n,2)+，当前 {coords.shape}")
+        raise ValueError(f"sliceA.obsm['{coord_key}'] must have shape (n, 2) or more columns; current shape: {coords.shape}")
 
     xmin, xmax, ymin, ymax = rect_bounds
 
@@ -262,13 +262,13 @@ def visualize_subslice(
 ):
     # --- Read coordinates and layer annotations ---
     if "spatial" not in sliceA.obsm_keys():
-        raise KeyError("sliceA.obsm['spatial'] 不存在。")
+        raise KeyError("sliceA.obsm['spatial'] is missing.")
     if color_key not in sliceA.obs.columns:
-        raise KeyError(f"sliceA.obs['{color_key}'] 不存在。")
+        raise KeyError(f"sliceA.obs['{color_key}'] is missing.")
 
     points_A = np.asarray(sliceA.obsm["spatial"])
     if points_A.ndim != 2 or points_A.shape[1] < 2:
-        raise ValueError(f"sliceA.obsm['spatial'] 形状需为 (n,2)+，当前 {points_A.shape}")
+        raise ValueError(f"sliceA.obsm['spatial'] must have shape (n, 2) or more columns; current shape: {points_A.shape}")
 
     x_coords_A, y_coords_A = points_A[:, 0], points_A[:, 1]
     labels = sliceA.obs[color_key].astype("category")
@@ -286,12 +286,12 @@ def visualize_subslice(
     elif isinstance(palette, dict):
         missing = [c for c in cats if c not in palette]
         if missing:
-            raise ValueError(f"palette 缺少颜色：{missing}")
+            raise ValueError(f"palette is missing colors: {missing}")
         color_map = palette
     else:
         seq = list(palette)
         if not seq:
-            raise ValueError("palette 为空。")
+            raise ValueError("palette is empty.")
         color_map = {cat: seq[i % len(seq)] for i, cat in enumerate(cats)}
 
     # --- Count and validate observations in subregions ---

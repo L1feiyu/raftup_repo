@@ -174,13 +174,13 @@ def plot_slice_by_layer(
 
     # --- Basic validation ---
     if coord_key not in adata.obsm_keys():
-        raise KeyError(f"adata.obsm['{coord_key}'] 不存在。可用键：{list(adata.obsm_keys())}")
+        raise KeyError(f"adata.obsm['{coord_key}'] is missing. Available keys: {list(adata.obsm_keys())}")
     if color_key not in adata.obs.columns:
-        raise KeyError(f"adata.obs['{color_key}'] 不存在。可用列部分示例：{list(adata.obs.columns[:10])}")
+        raise KeyError(f"adata.obs['{color_key}'] is missing. Example available columns: {list(adata.obs.columns[:10])}")
 
     coords = np.asarray(adata.obsm[coord_key])
     if coords.ndim != 2 or coords.shape[1] < 2:
-        raise ValueError(f"adata.obsm['{coord_key}'] 必须是 (n_obs, 2) 或以上，当前形状：{coords.shape}")
+        raise ValueError(f"adata.obsm['{coord_key}'] must have shape (n_obs, 2) or more columns; current shape: {coords.shape}")
 
     x, y = coords[:, 0], coords[:, 1]
     labels = adata.obs[color_key].astype("category")
@@ -205,13 +205,13 @@ def plot_slice_by_layer(
         # Use the user-supplied dictionary
         missing = [c for c in cats if c not in palette]
         if missing:
-            raise ValueError(f"palette 缺少以下层的颜色：{missing}")
+            raise ValueError(f"palette is missing colors for the following layers: {missing}")
         color_map = palette
     else:
         # Sequence: assign colors in order, cycling if necessary
         palette_seq = list(palette)
         if len(palette_seq) == 0:
-            raise ValueError("palette 为空。")
+            raise ValueError("palette is empty.")
         color_map = {cat: palette_seq[i % len(palette_seq)] for i, cat in enumerate(cats)}
 
     # --- Plot ---
