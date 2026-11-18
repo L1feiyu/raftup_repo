@@ -1,18 +1,45 @@
-# RAFT-UP revision branch
+# RAFT-UP — revision branch
 
-Package name: **raftup**. Development version: **0.2.0.dev0**. This branch organizes the revision implementation and experiments. The original `main` commit remains unchanged.
+RAFT-UP aligns spatial transcriptomics data under partial overlap. This branch contains the revision package (`raftup`, version `0.2.0.dev0`), automatic/manual alignment entry points and experiment notebooks. `main` retains the original version.
 
-Start with [revision installation and notebooks](examples/revision/README.md). Each experiment has a package-call notebook; the five latest manuscript plots are in [figures](examples/revision/figures). Use [environment.yml](environment.yml) for the revision environment; the previous definition is preserved in [environment-legacy.yml](environments/environment-legacy.yml).
+## Start here
 
-```python
-from raftup import run_automated_alignment, run_manual_alignment
+You need Git, Conda (or Miniforge) and internet access to install dependencies. Run these commands in a terminal; do not enter them into a notebook Python cell.
+
+```sh
+git clone --branch revision https://github.com/L1feiyu/raftup_repo.git
+cd raftup_repo
+conda env create -f environment.yml
+conda activate raftup_revision
+python -m pip install -e '.[revision]'
+python -m pip check
+python -m ipykernel install --user --name raftup_revision --display-name 'Python (raftup_revision)'
+python scripts/execute_revision_notebooks.py --mode tutorials --notebook 00 \
+  --output-dir outputs/smoke_check_01
 ```
 
-See [VALIDATION.md](examples/revision/VALIDATION.md) for execution checks and [DATA.md](examples/revision/DATA.md) for download links and portable input paths. Saved paper results are external input data, not bundled with the Python package.
+The final command runs a small solver check without downloading any data. It writes an executed notebook and `result.json` under `outputs/smoke_check_01/00_installation_smoke_test/`. Use a new output directory when repeating the check. If an environment named `raftup_revision` already exists, activate that installation or choose a different environment name with `conda env create -n YOUR_ENV -f environment.yml`; then activate and register that environment under its own kernel name.
+
+The environment was verified on macOS arm64 with CPU execution. Linux/CUDA is not yet verified. A GPU is not required for the saved-cost alignment and plotting examples. See [installation and execution instructions](examples/revision/README.md) and the precise [validation scope](examples/revision/VALIDATION.md).
+
+## Choose what to run
+
+| Goal | Entry point | Inputs |
+|---|---|---|
+| Check installation | [Notebook 00](examples/revision/00_installation_smoke_test.ipynb) | None; synthetic input is generated in memory |
+| Run a new alignment or evaluation | [Tutorials 01–07](examples/revision/README.md) | Prepared slices, ordered feature costs and a pair/series manifest; audit 07 also needs a saved alignment |
+| Redraw the five manuscript figures | [Figure notebooks](examples/revision/figures) | Authors' saved revision-result archive; original raw data alone are insufficient |
+| Inspect original experiment protocols | [Historical protocol copies](examples/revision/protocol_sources) | Historical paths and environments; not the portable entry point |
+
+[DATA.md](examples/revision/DATA.md) lists original-data downloads, the input format and preparation commands. New revision datasets and generated results are kept outside Git. Some older tutorial assets remain in the repository history. **The derived-result archive needed for the exact paper figures does not yet have a public download link in this repository.** The package-call tutorials and the archived-figure notebooks serve different purposes.
+
+For interactive use, run `jupyter lab` from this repository and select **Python (raftup_revision)** in the notebook kernel menu. Begin with notebook 00, then follow the input checklist in the selected tutorial. The revision environment and the [legacy environment](environments/environment-legacy.yml) are separate configurations.
 
 ---
 
-# RAFT-UP
+# Legacy tutorials and background
+
+The material below describes the original workflows. Start with the revision notebooks linked above for the new experiments. Legacy notebooks may use different paths or environments and were not included in the revision execution checks.
 
 RAFT-UP is a tool for robust spatial transcriptomics data alignment that infers overlap portion and provides explicit control over spatial distance
 preservation. It provides tools for preprocessing, gene-cost construction, downsampling-based matching, full-resolution recovery, and visualization of alignment results.
@@ -29,7 +56,7 @@ A typical workflow in RAFT-UP includes:
 4. Recover the full-resolution alignment.
 5. Visualize and evaluate the matching results.
 
-The main end-to-end tutorial is located at:
+The original end-to-end tutorial is located at:
 ```bash
 examples/DLPFC_tutorial/RAFTUP_end_to_end_pipeline.ipynb
 ```

@@ -1,6 +1,6 @@
 # Data downloads and directory layout
 
-**Datasets, cached feature costs, alignment matrices and generated results are not uploaded to GitHub.** Download them separately; keep them in the ignored `data/` directory or another local disk. All notebooks support environment-variable path overrides. Do not commit executed notebooks containing data or large output images.
+**New revision datasets, cached feature costs, alignment matrices and generated results are not bundled with these tutorials.** Older tutorial assets may already be tracked in the repository; they do not constitute the complete revision inputs. Download them separately; keep them in the ignored `data/` directory or another local disk. All notebooks support environment-variable path overrides. Do not commit executed notebooks containing data or large output images.
 
 ## Original source data
 
@@ -73,3 +73,28 @@ For spatial auditing, additionally place the saved `alignment_matrix.npz` in the
 ## Existing-result reproducibility
 
 The paper's downsampling figure combines 17 historical runs and one supplemental 10% run. A fresh six-ratio sweep in notebook 06 is a new computation and is labeled accordingly. A short adjacent-pair execution check of notebook 04 is not a rerun of the full 15-section experiment. Validation reports distinguish these scopes explicitly.
+
+## Manifest fields and experiment-specific prerequisites
+
+The preparation script creates `pair.json`, the two `.h5ad` files, the feature-cost `.npy` and ID JSON files in the requested output folder. Use an empty folder. It does not create ground truth, purity annotations, serial sections or audit settings. Keep a unique `name` for each pair, especially in a reconstruction series.
+
+| Field | Meaning |
+|---|---|
+| `name` | Case name used in output paths; tutorial 06 requires one of the three names below |
+| `slice_a`, `slice_b` | Paths to prepared `.h5ad` inputs |
+| `feature_cost` | A-by-B `.npy` matrix in the recorded observation order |
+| `cell_ids_a`, `cell_ids_b` | Paths to JSON lists of observation IDs in cost-matrix order |
+| `data_technology` | `dlpfc` or `merfish`; the partial-overlap router still needs the actual assay |
+| `pixels_per_100um` | Number of input coordinate units per 100 µm; 100 for coordinates already in µm |
+
+The same pair manifest can be reused for different notebooks, but each run should have its own output directory. No download or preparation happens automatically when a real-data notebook is opened.
+
+- **03, known overlap:** optionally add `"ground_truth": "ground_truth.npy"` to `pair.json`. This must be an A-by-B boolean/0–1 array in the same order as the cost, derived from known correspondence (for example retained IDs in a simulated crop). Without this field the final precision/recall cell is skipped. The tutorial does not generate the five overlap conditions.
+- **04, reconstruction:** place `series.json` in `deep_starmap_series/`, containing an ordered list such as `["00_01/pair.json", "01_02/pair.json"]`. Pair paths resolve relative to `series.json`; each pair's input paths resolve relative to its own `pair.json`. Shared sections must have identical IDs, order and original XY coordinates. Use distinct pair names. The existing notebook sets `Z_SPACING = 10`; verify that this matches your intended z units and spacing. The notebook does not create sections or random rotations from the raw 3D volume.
+- **05, HT206B1:** both slices must contain finite `obs['Tumor_purity_estimate']` values aligned by barcode, with XY coordinates in µm and `pixels_per_100um=100`. The notebook processes one pair per run and prints Spearman correlation and MAE for spatial mutual nearest neighbours within 100 µm. Repeat manually for the three adjacent pairs if needed; it does not aggregate all pairs automatically.
+- **06, downsampling:** `name` must be exactly `dlpfc_0708`, `merfish_0409` or `deep_starmap_13_14`, matching the input and fixed protocol. It runs six ratios for one case per invocation. The batch runner maps 06 to `dlpfc_0708`; use the interactive `RAFTUP_TUTORIAL_DATA` override for either other case.
+- **07, spatial audit:** copy the desired run's `alignment_matrix.npz` into the same directory as `pair.json`. Verify its A/B order against those inputs. Add `audit_coordinate_scale` as two coordinate multipliers and `audit_spatial_cutoff` from that run's recorded recovery cutoff. This notebook also loads the feature cost through the shared loader, even though the audit itself uses coordinates and alignment support. It does not regenerate a missing alignment.
+
+For the documented DLPFC example (original coordinates at 138 units per 100 µm), the multipliers are `[100/138, 100/138]` numerically, as in `pair.example.json`. Use cutoff 200 only if the selected run actually recorded a 200-µm recovery cutoff. Check `decision.json`; do not assume the example cutoff applies to a different selected template.
+
+The raw-data preparation snippets are starting points. Exact paper reproduction also depends on preprocessing, cell filtering, feature costs, rotations and saved run settings. Newly generated costs may give different results. No public processed-input/result archive has yet been linked, so an external user cannot currently reproduce every saved paper figure from a raw download alone.
