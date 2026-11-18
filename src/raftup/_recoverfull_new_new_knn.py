@@ -416,11 +416,11 @@ def _safe_row_normalize(mat, axis=1, eps=1e-12):
     return m / s
 
 def _topk_indices_per_row(D, k):
-    # 返回一个 list: 第 i 个元素是 D[i] 的 k 个最小值索引（不含自身锚点的特殊处理这里不做）
+    # Return a list whose i-th element contains indices of the k smallest values in D[i]; no special exclusion of self-anchors is applied here
     k = min(k, D.shape[1])
-    # argpartition 比 argsort 快
+    # argpartition is faster than argsort
     idx = np.argpartition(D, kth=k-1, axis=1)[:, :k]
-    # 在这 k 个里按实际距离排序
+    # Sort these k entries by their actual distances
     row_order = np.take_along_axis(D, idx, axis=1).argsort(axis=1)
     return [idx[i, row_order[i]] for i in range(D.shape[0])]
 
@@ -445,13 +445,13 @@ def recover_full_mapping_knn(
     matrix_rescaling_checking=lambda x: None
 ):
     """
-    与原函数一致的接口 + k1/k2。
-    需要你把 sot_solver 传入（例如之前的 sot_sinkhorn_l1_sparse）。
+    Use the original function interface with additional k1/k2 parameters.
+    Supply sot_solver explicitly, for example sot_sinkhorn_l1_sparse.
     """
     steps = 8
     pbar = tqdm(total=steps, desc="recover_full_mapping_knn", leave=False)
 
-    # 1) 全量到“锚点”的距离
+    # 1) Distances from all observations to anchors
     # D1: N1 x n1_sub  ; D2: N2 x n2_sub
     D1 = distance_matrix(X1, X1[idx1, :])
     D2 = distance_matrix(X2, X2[idx2, :])
@@ -463,7 +463,7 @@ def recover_full_mapping_knn(
     a = np.ones(N1) / N1
     b = np.ones(N2) / N2
 
-    # 2) 根据 P 的质量筛锚点列
+    # 2) Filter anchor columns by their mass in P
     if pruned_P:
         P_sig = P
         D1_sig = D1
@@ -479,38 +479,38 @@ def recover_full_mapping_knn(
     pbar.update(1)
 
     # 3) 
-    #   在 n1_sig 坐标系里：用 row-normalized P 将 D2_sig -> D2_to_D1 (N2 x n1_sig)
-    #   在 n2_sig 坐标系里：用 col-normalized P 将 D1_sig -> D1_to_D2 (N1 x n2_sig)
+    #   In the n1_sig frame: use row-normalized P to map D2_sig -> D2_to_D1 (N2 x n1_sig)
+    #   In the n2_sig frame: use column-normalized P to map D1_sig -> D1_to_D2 (N1 x n2_sig)
     P_row = _safe_row_normalize(P_sig, axis=1)            # n1_sig x n2_sig
     P_colT = _safe_row_normalize(P_sig, axis=0).T         # n2_sig x n1_sig
     D1_to_D2 = D1_sig @ P_row                              # N1 x n2_sig
     D2_to_D1 = D2_sig @ P_colT                             # N2 x n1_sig
     pbar.update(1)
 
-    # 4) 为每个 i/j 选各自 kNN 的锚点索引
+    # 4) Select the k-nearest anchor indices for each i/j
     K1_list = _topk_indices_per_row(D1_sig, k1)   # list of arrays, each in [0, n1_sig)
     K2_list = _topk_indices_per_row(D2_sig, k2)   # list of arrays, each in [0, n2_sig)
 
-    # 5) 基于逐点 kNN 的 C1, C2；同时构造 CGW 屏蔽用的 diff
+    # 5) Compute C1 and C2 from per-observation kNN anchors and construct diff for the CGW mask
     C1 = np.empty((N1, N2), dtype=float)
     C2 = np.empty((N1, N2), dtype=float)
 
     
     for j in range(N2):
-        Kj1 = None  # 用于 C1 的列集由"i"决定，不是 j；这里先置空
-        Kj2 = K2_list[j]  # 用于 C2 的列集由 j 决定（在 n2_sig 坐标系）
-        # 预取 D2_sig[j, Kj2] 与 D1_to_D2[:, Kj2]
+        Kj1 = None  # The column set for C1 depends on i, not j; initialize it as None here
+        Kj2 = K2_list[j]  # The column set for C2 depends on j (in the n2_sig frame)
+        # Pre-fetch D2_sig[j, Kj2] and D1_to_D2[:, Kj2]
         D2_sig_j = D2_sig[j, Kj2]                # (k2,)
         D1_to_D2_Kj2 = D1_to_D2[:, Kj2]          # (N1, k2)
 
-        # 局部差值（用于 CGW 屏蔽 & cost）
+        # Local differences for the CGW mask and cost
         diff_C2 = D1_to_D2_Kj2 - D2_sig_j[None, :]  # (N1, k2)
         
         C2[:, j] = np.sum(np.abs(diff_C2) ** p_cost, axis=1) ** (1.0 / p_cost)
 
         for i in range(N1):
-            Ki1 = K1_list[i]                          # 在 n1_sig 坐标系
-            # 预取 D1_sig[i, Ki1] 与 D2_to_D1[j, Ki1]
+            Ki1 = K1_list[i]                          # In the n1_sig frame
+            # Pre-fetch D1_sig[i, Ki1] and D2_to_D1[j, Ki1]
             d1_i = D1_sig[i, Ki1]                     # (k1,)
             d2proj_j = D2_to_D1[j, Ki1]               # (k1,)
             diff_C1 = d1_i - d2proj_j                 # (k1,)
@@ -519,7 +519,7 @@ def recover_full_mapping_knn(
     pbar.update(1)
 
     # 6) CGW and CCC
-    #   为了与上面的 C1/C2 一致，我们再做一次“是否越界”的检查（逐点子坐标）
+    #   Check the bounds again in per-observation subcoordinates for consistency with C1/C2 above
     mask = np.zeros((N1, N2), dtype=bool)
     for j in range(N2):
         Kj2 = K2_list[j]
@@ -537,7 +537,7 @@ def recover_full_mapping_knn(
     print("Number of possible aligned positions (kNN):", np.sum(~mask))
     pbar.update(1)
 
-    # 7) 归一化 + 与 M 融合
+    # 7) Normalize and combine with M
     C = 0.5 * (C1 + C2)
     C_percentile_99 = np.percentile(C, 99)
     C_capped = np.minimum(C, C_percentile_99)
@@ -562,7 +562,7 @@ def recover_full_mapping_knn(
     CM_sparse = CM_sparse / max(CM_sparse.max(), 1e-12)
     pbar.update(1)
 
-    # 8) 运行 sOT
+    # 8) Run sOT
     m = 2
     P_full = sot_sinkhorn_l1_sparse(a, b, CM_sparse, eps, m, nitermax=nitermax, stopthr=stopthr, verbose=True)
 

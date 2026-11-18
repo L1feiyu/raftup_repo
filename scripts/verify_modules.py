@@ -24,7 +24,7 @@ def test_downsample():
     import scanpy as sc
     import numpy as np
 
-    # 构造最小 AnnData
+    # Create a minimal AnnData object
     X = np.random.rand(10, 5)
     adata = sc.AnnData(X)
     adata.obsm["spatial"] = np.random.rand(10, 2)

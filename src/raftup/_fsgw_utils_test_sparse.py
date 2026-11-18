@@ -428,7 +428,7 @@ def fsgw_mvc_exp(
     fsgw_eps=0.01,
     fsgw_alpha=0.1,
     fsgw_gamma=2,
-    seed=42,                     # ✅ 默认 seed 改为 42
+    seed=42,                     # Default random seed: 42
 ):
     # -----------------------------
     # reproducibility (only this)

@@ -134,45 +134,45 @@ def plot_slice_by_layer(
     adata,
     coord_key: str = "spatial",
     color_key: str = "original_clusters",
-    palette=None,                 # 可传入 dict: {layer_name: "#RRGGBB"} 或 list/tuple 颜色序列
+    palette=None,                 # Accepts a dict {layer_name: "#RRGGBB"} or a list/tuple of colors
     figsize=(8, 7),
-    s=None,                       # 点大小（默认随样本量自适应）
+    s=None,                       # Point size (automatically adjusted to sample size by default)
     alpha=0.85,
     equal_aspect=True,
-    invert_y=True,                # 许多空间转录组坐标 Y 轴向下增大；若图上下颠倒可改为 False
+    invert_y=True,                # Many spatial coordinate systems increase Y downward; set False if the plot is inverted
     edgecolors="none",
     title: str = None,
 ):
     """
-    根据 AnnData 的真实 2D 坐标绘制样本点，并按层 (obs[color_key]) 上色。
+    Plot observations at their original 2D AnnData coordinates, colored by layer (obs[color_key]).
 
     Parameters
     ----------
     adata : AnnData
-        含有空间坐标与分层信息的对象
+        Object containing spatial coordinates and layer annotations
     coord_key : str
-        2D 坐标所在的 .obsm 键名（默认 'spatial'）
+        Key in .obsm containing 2D coordinates (default: 'spatial')
     color_key : str
-        分层信息所在的 .obs 列名（默认 'original_clusters'）
+        Column in .obs containing layer annotations (default: 'original_clusters')
     palette : dict or list/tuple or None
-        若为 dict，键是层名、值是颜色；若为序列，将按顺序分配给各层；None 则自动使用 'tab20'
+        A dict maps layer names to colors; a sequence assigns colors in order; None uses 'tab20'
     figsize : tuple
-        图尺寸
+        Figure size
     s : float or None
-        散点大小，None 时按样本量自适应
+        Marker size; None adjusts it automatically to the sample size
     alpha : float
-        散点透明度
+        Marker opacity
     equal_aspect : bool
-        是否强制等比例坐标轴
+        Whether to enforce an equal axis aspect ratio
     invert_y : bool
-        是否翻转 y 轴方向（默认 True，适配常见空间切片坐标）
+        Whether to invert the y-axis (default: True, for common spatial-section coordinates)
     edgecolors : str
-        散点边缘色
+        Marker edge color
     title : str or None
-        自定义标题；None 时自动生成
+        Custom title; generated automatically when None
     """
 
-    # --- 基本检查 ---
+    # --- Basic validation ---
     if coord_key not in adata.obsm_keys():
         raise KeyError(f"adata.obsm['{coord_key}'] 不存在。可用键：{list(adata.obsm_keys())}")
     if color_key not in adata.obs.columns:
@@ -189,38 +189,38 @@ def plot_slice_by_layer(
     n = len(adata)
     k = len(cats)
 
-    # --- 点大小自适应 ---
+    # --- Adaptive marker size ---
     if s is None:
-        # 简单随规模缩放：大样本更小
+        # Scale with sample size: use smaller markers for larger samples
         s = max(2.0, min(18.0, 120000.0 / max(n, 1)))
 
-    # --- 构建调色板 ---
+    # --- Build the color palette ---
     color_map = {}
     if palette is None:
-        # 使用 tab20 循环
+        # Cycle through tab20 colors
         base = get_cmap("tab20")
         base_colors = [base(i % base.N) for i in range(k)]
         color_map = {cat: base_colors[i] for i, cat in enumerate(cats)}
     elif isinstance(palette, dict):
-        # 用户显式提供 dict
+        # Use the user-supplied dictionary
         missing = [c for c in cats if c not in palette]
         if missing:
             raise ValueError(f"palette 缺少以下层的颜色：{missing}")
         color_map = palette
     else:
-        # 序列：按顺序分配（不够则循环）
+        # Sequence: assign colors in order, cycling if necessary
         palette_seq = list(palette)
         if len(palette_seq) == 0:
             raise ValueError("palette 为空。")
         color_map = {cat: palette_seq[i % len(palette_seq)] for i, cat in enumerate(cats)}
 
-    # --- 作图 ---
+    # --- Plot ---
     fig, ax = plt.subplots(figsize=figsize)
 
-    # 背景淡灰（可开关：把下面这行注释掉即可不画背景）
+    # Light gray background (comment out the following line to omit it)
     ax.scatter(x, y, s=max(1.0, s*0.35), c="lightgray", alpha=0.6, edgecolors="none", label="_bg")
 
-    # 分层逐类绘制
+    # Plot each layer separately
     handles = []
     for cat in cats:
         mask = (labels.values == cat)
@@ -228,7 +228,7 @@ def plot_slice_by_layer(
         h = ax.scatter(xi, yi, s=s, c=[color_map[cat]], alpha=alpha, edgecolors=edgecolors, label=f"{cat} ({mask.sum()})")
         handles.append(h)
 
-    # 轴与标题
+    # Axes and title
     if equal_aspect:
         ax.set_aspect("equal", adjustable="datalim")
     if invert_y:
@@ -241,7 +241,7 @@ def plot_slice_by_layer(
     else:
         ax.set_title(title)
 
-    # 图例（按两列排，避免过长）
+    # Two-column legend to limit its height
     if len(handles) > 0:
         ax.legend(loc="best", frameon=True, markerscale=1.0, ncol=1)
 
@@ -249,5 +249,5 @@ def plot_slice_by_layer(
     plt.tight_layout()
     plt.show()
 
-    # 返回颜色映射，便于复用/保存
+    # Return the color mapping for reuse or saving
     return color_map

@@ -209,7 +209,7 @@ def cal_layer_based_alignment_result_full_skip_all_zero(alignment, labels):
     valid_rows = 0
 
     for i, elem in enumerate(alignment):
-        # 跳过全零行
+        # Skip all-zero rows
         if elem.max() == 0:
             continue  
 
@@ -222,7 +222,7 @@ def cal_layer_based_alignment_result_full_skip_all_zero(alignment, labels):
             cnt[diff] += 1
         valid_rows += 1
 
-    # 分母只用有效行数
+    # Use only valid rows in the denominator
     denom = max(valid_rows, 1)
     res = (cnt / denom).tolist()
     
@@ -231,13 +231,13 @@ def cal_layer_based_alignment_result_full_skip_all_zero(alignment, labels):
 
 def cal_layer_based_alignment_result_merfish_skill_all_zero(alignment, labels):
     """
-    计算 MERFISH 的对齐准确率：
-    - 跳过 alignment 中全零的行
-    - 跳过任意一端 label 为 -1 或未在 l_dict 中的行
-    - 只用有效行数 valid_rows 作为分母
+    Compute alignment accuracy for MERFISH:
+    - Skip all-zero rows in alignment
+    - Skip rows where either label is -1 or absent from l_dict
+    - Use only the valid row count, valid_rows, as the denominator
     """
 
-    # 区域 → 数字的映射
+    # Region-to-integer mapping
     l_dict = {
         "BST": 0,
         "MPA": 1,
@@ -247,38 +247,38 @@ def cal_layer_based_alignment_result_merfish_skill_all_zero(alignment, labels):
         "PVT": 5,
         "V3": 6,
         "fx": 7,
-        # np.nan: -1   # 这里用不到也可以不写
+        # np.nan: -1   # Unused here; this entry may be omitted
     }
 
-    cnt0 = 0          # label 一致的计数
-    valid_rows = 0    # 有效行计数（非全零 & label 有效）
+    cnt0 = 0          # Count of matching labels
+    valid_rows = 0    # Count of valid rows (nonzero alignment and valid labels)
 
     n = alignment.shape[0]
 
     for i, elem in enumerate(alignment):
-        # 1) 跳过全零行
+        # 1) Skip all-zero rows
         if elem.max() == 0:
             continue
 
-        # 2) 找到当前行的 argmax 匹配 j
+        # 2) Find the argmax match j for the current row
         j = elem.argmax()
 
         label_i = labels[i]
         label_j = labels[n + j]
 
-        # 3) 跳过无效 label（-1 或不在字典里）
+        # 3) Skip invalid labels (-1 or absent from the dictionary)
         if label_i == '-1' or label_j == '-1':
             continue
         if (label_i not in l_dict) or (label_j not in l_dict):
             continue
 
-        # 4) 统计 label 是否一致
+        # 4) Count label matches
         if l_dict[label_i] == l_dict[label_j]:
             cnt0 += 1
 
         valid_rows += 1
 
-    # 分母只用有效行数，避免除 0
+    # Use only valid rows in the denominator; avoid division by zero
     denom = max(valid_rows, 1)
     acc = cnt0 / denom
 

@@ -84,25 +84,25 @@ def robust_maxmin_downsample_slice(sliceA, num_landmarks, outlier_fraction=0.05,
 def downsample_slice_by_window(
     sliceA,
     rect_bounds,                 # (xmin, xmax, ymin, ymax)
-    max_points=None,             # e.g., 200；None 表示不限制
-    strict=True,                 # True: 超过 max_points 抛错；False: 自动截断到 max_points
-    coord_key="spatial",         # 如果坐标不在 'spatial'，可改
+    max_points=None,             # e.g., 200; None means no limit
+    strict=True,                 # True: raise if max_points is exceeded; False: truncate to max_points
+    coord_key="spatial",         # Change this if coordinates are not stored in 'spatial'
 ):
     """
-    按矩形小窗口从 sliceA 中挑点（downsample），返回子集 AnnData 和其在原始 sliceA 中的索引。
-    - 与你现有 subslice 代码一致：downsampled_sliceA = sliceA[indices_dsa].copy()
-    - indices_dsa 是相对于原始 sliceA 的索引（保持原始顺序）
+    Select observations from a rectangular window in sliceA and return the AnnData subset and its indices in the original sliceA.
+    - Uses the same subsetting operation: downsampled_sliceA = sliceA[indices_dsa].copy()
+    - indices_dsa contains indices into the original sliceA, preserving their order
 
     Parameters
     ----------
     sliceA : AnnData
     rect_bounds : tuple (xmin, xmax, ymin, ymax)
     max_points : int or None
-        若指定，限制窗口内最多点数。strict=True 时超过直接报错。
+        If specified, limit the number of observations in the window. Raise an error if exceeded when strict=True.
     strict : bool
-        True：超过 max_points 抛 ValueError；False：自动保留前 max_points（按原始顺序）。
+        True: raise ValueError if max_points is exceeded; False: retain the first max_points observations in their original order.
     coord_key : str
-        坐标所在的 obsm 键。
+        Key in obsm containing coordinates.
 
     Returns
     -------
@@ -118,17 +118,17 @@ def downsample_slice_by_window(
 
     xmin, xmax, ymin, ymax = rect_bounds
 
-    # 按窗口筛选（注意是闭区间）
+    # Filter by the window using inclusive boundaries
     mask = (coords[:, 0] >= xmin) & (coords[:, 0] <= xmax) & \
            (coords[:, 1] >= ymin) & (coords[:, 1] <= ymax)
 
-    # 将 True 的位置作为原始索引取出；保持原始顺序
+    # Extract True positions as original indices, preserving order
     indices_dsa = np.nonzero(mask)[0]
 
     n_sub = len(indices_dsa)
     print(f"[downsample_slice_by_window] Sub-slice contains {n_sub} points in window {rect_bounds}")
 
-    # 数量约束
+    # Observation-count constraint
     if max_points is not None and n_sub > max_points:
         if strict:
             raise ValueError(
@@ -136,12 +136,12 @@ def downsample_slice_by_window(
                 f"Please shrink the rectangle or increase max_points."
             )
         else:
-            # 非严格：按原始顺序截断
+            # Non-strict mode: truncate in the original order
             indices_dsa = indices_dsa[:max_points]
             n_sub = max_points
             print(f"→ Truncated to {max_points} points (strict=False).")
 
-    # 生成子集（若为空则返回 None 和空索引）
+    # Create the subset (return None and empty indices if no observations remain)
     if n_sub > 0:
         downsampled_sliceA = sliceA[indices_dsa].copy()
     else:
@@ -249,18 +249,18 @@ def visualize_subslice(
     rect_bounds,                      # (xmin, xmax, ymin, ymax)
     max_points=200,
     color_key: str = "original_clusters",
-    palette=None,                     # 可传 dict {layer: color} 或序列；None 用 tab20
+    palette=None,                     # Accepts a dict {layer: color} or a sequence; None uses tab20
     figsize=(8, 6),
-    s=None,                           # 点大小，None 时随样本量自适应
+    s=None,                           # Marker size; None adjusts it to the sample size
     alpha=0.85,
-    invert_y=True,                    # 常见像素坐标系建议 True
+    invert_y=True,                    # True is recommended for common pixel coordinate systems
     edgecolors="none",
     show_legend=True,
     title="Sub-slice Visualization",
     save_path=None, 
     **kwargs
 ):
-    # --- 取坐标与分层 ---
+    # --- Read coordinates and layer annotations ---
     if "spatial" not in sliceA.obsm_keys():
         raise KeyError("sliceA.obsm['spatial'] 不存在。")
     if color_key not in sliceA.obs.columns:
@@ -278,7 +278,7 @@ def visualize_subslice(
     if s is None:
         s = max(2.0, min(18.0, 120000.0 / max(n, 1)))
 
-    # --- 颜色映射 ---
+    # --- Color mapping ---
     if palette is None:
         base = get_cmap("tab20")
         base_colors = [base(i % base.N) for i in range(len(cats))]
@@ -294,7 +294,7 @@ def visualize_subslice(
             raise ValueError("palette 为空。")
         color_map = {cat: seq[i % len(seq)] for i, cat in enumerate(cats)}
 
-    # --- 子区域计数与校验 ---
+    # --- Count and validate observations in subregions ---
     xmin, xmax, ymin, ymax = rect_bounds
     mask = (x_coords_A >= xmin) & (x_coords_A <= xmax) & \
            (y_coords_A >= ymin) & (y_coords_A <= ymax)
@@ -306,21 +306,21 @@ def visualize_subslice(
             f"Please shrink the rectangle or lower max_points."
         )
 
-    # --- 作图（按 layer 上色；子区域仅画矩形框，不额外上色）---
+    # --- Plot by layer; outline subregions with rectangles without additional coloring---
     fig, ax = plt.subplots(figsize=figsize)
 
-    # 按类逐层绘制
+    # Plot each layer separately
     for cat in cats:
         m = (labels.values == cat)
         ax.scatter(x_coords_A[m], y_coords_A[m], s=s, c=[color_map[cat]],
                    alpha=alpha, edgecolors=edgecolors, label=f"{cat} ({m.sum()})")
 
-    # 等距坐标
+    # Equal axis aspect ratio
     ax.set_aspect("equal", adjustable="datalim")
     if invert_y:
         ax.invert_yaxis()
 
-    # 矩形框标注子区域
+    # Outline subregions with rectangles
     rect_x = [xmin, xmax, xmax, xmin, xmin]
     rect_y = [ymin, ymin, ymax, ymax, ymin]
     ax.plot(rect_x, rect_y, c='black', linestyle='--', linewidth=1.5, label='Rectangle Bounds')
@@ -329,15 +329,15 @@ def visualize_subslice(
     # ax.set_ylabel('Y Coordinate')
     ax.set_axis_off()
 
-    # 标题加上子区域点数
+    # Include subregion observation counts in the title
     ax.set_title(f"{title} : {n_sub} points")
     if show_legend:
-        ax.legend(loc="best", frameon=True, ncol=1)  # 强制单列
+        ax.legend(loc="best", frameon=True, ncol=1)  # Use a single column
     ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.3)
     plt.tight_layout()
     plt.show()
 
-    # 子区域布尔索引 mask 已经计算好
+    # The boolean subregion mask has already been computed
     if save_path is not None:
         subslice = sliceA[mask].copy()
         subslice.write_h5ad(save_path)
